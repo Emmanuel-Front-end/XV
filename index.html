@@ -990,7 +990,7 @@
     <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
 
     <div class="rsvp-form" id="rsvpForm">
-      <input type="text" class="rsvp-input" id="guestName" placeholder="Familia" maxlength="60">
+      <input type="text" class="rsvp-input" id="guestName" placeholder="Tu nombre (opcional)" maxlength="60">
 
       <div class="rsvp-stepper">
         <span class="stepper-label">¿Cuántos van a asistir?</span>
@@ -1332,8 +1332,8 @@
     let message = `¡Hola! Confirmo mi asistencia a los XV años de Maria Fernanda 🌸\n\n`;
     message += `${typedName ? 'Nombre: ' + typedName + '\n' : ''}`;
     message += `Número de personas: ${guestQty}\n`;
-    message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
-    message += allNames.map(n => `• ${n}`).join('\n');
+    // message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
+    // message += allNames.map(n => `• ${n}`).join('\n');
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank', 'noopener');
