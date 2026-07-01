@@ -1376,6 +1376,24 @@
     if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
       showConfirmedState();
     }
+
+    // Revisa el contador cada 5 segundos: mantiene el número al día,
+    // y si detecta que todo se reinició (total en 0), desbloquea
+    // el formulario automáticamente sin que el invitado haga nada.
+    setInterval(async ()=>{
+      const latest = await fetchConfirmations();
+      rsvpCountEl.textContent = latest.count;
+
+      if(latest.count === 0 && localStorage.getItem(CONFIRMED_KEY) === 'true'){
+        localStorage.removeItem(CONFIRMED_KEY);
+        rsvpForm.classList.remove('hidden');
+        confirmBtn.textContent = '💬 Confirmar y enviar por WhatsApp';
+        confirmBtn.classList.remove('confirmed');
+        guestNameInput.value = '';
+        guestQty = 1;
+        renderStepper();
+      }
+    }, 5000);
   }
 
   function showConfirmedState(){
