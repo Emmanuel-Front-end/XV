@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis XV Años · Maria Fernanda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,500&family=Cormorant+Garamond:ital@0;1&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#fdf5f5;
+    --pink:#c76b8f;
+    --pink-deep:#9a3f66;
+    --pink-mid:#dc8ba8;
+    --gold:#d9a86a;
+    --gold-soft:#f0d9b8;
+    --blush:#f3d3d9;
+    --ink:#3a2530;
+    --stem:#7a8c6a;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth; overflow-anchor:none;}
+
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Cormorant Garamond', serif;
+    overflow-x:hidden;
+  }
+
+  body.locked{ overflow:hidden; height:100svh; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ================= SOBRE / ENVELOPE INTRO ================= */
+  .envelope-screen{
+    position:fixed; inset:0;
+    z-index:100;
+    background:radial-gradient(circle at 50% 40%, #fff 0%, var(--cream) 70%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity 0.7s ease, visibility 0.7s ease;
+  }
+  .envelope-screen.hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+
+  .envelope-hint{
+    position:absolute;
+    bottom:14%;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.6;
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:0.35; }
+    50%{ opacity:0.75; }
+  }
+
+  .envelope{
+    position:relative;
+    width:min(78vw, 320px);
+    height:min(56vw, 220px);
+    cursor:pointer;
+    perspective:1000px;
+  }
+
+  .env-body{
+    position:absolute; inset:0;
+    background:linear-gradient(160deg, #fff, var(--blush));
+    border-radius:6px;
+    box-shadow:0 20px 44px rgba(154,63,102,0.22);
+    overflow:hidden;
+  }
+  .env-body::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(115deg, rgba(154,63,102,0.08) 0%, transparent 35%),
+      linear-gradient(245deg, rgba(154,63,102,0.08) 0%, transparent 35%);
+  }
+
+  .env-letter{
+    position:absolute;
+    left:8%; right:8%;
+    top:14%;
+    height:78%;
+    background:#fffdfb;
+    border-radius:4px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:transform 0.9s cubic-bezier(.22,.9,.3,1.2);
+    z-index:2;
+  }
+  .env-letter .l-mono{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:24px;
+    color:var(--pink-deep);
+  }
+  .env-letter .l-text{
+    font-family:'Montserrat', sans-serif;
+    font-size:9px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.6;
+  }
+
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:56%;
+    background:linear-gradient(160deg, var(--blush), var(--pink));
+    clip-path:polygon(0 0, 100% 0, 50% 92%);
+    transform-origin:top center;
+    transition:transform 0.8s cubic-bezier(.6,-0.1,.4,1.3);
+    z-index:3;
+    box-shadow:0 2px 8px rgba(154,63,102,0.15);
+  }
+
+  .env-seal{
+    position:absolute;
+    top:38%; left:50%;
+    transform:translate(-50%,-50%);
+    width:46px; height:46px;
+    background:radial-gradient(circle at 35% 30%, var(--pink), var(--pink-deep));
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--gold-soft);
+    font-size:18px;
+    z-index:4;
+    box-shadow:0 4px 10px rgba(154,63,102,0.35);
+    transition:opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .envelope.open .env-flap{ transform:rotateX(180deg); }
+  .envelope.open .env-seal{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+  .envelope.open .env-letter{ transform:translateY(-64%) scale(1.04); }
+
+  /* ================= PÉTALOS CAYENDO — ambiente ================= */
+  .petals-field{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:2;
+    overflow:hidden;
+  }
+  .falling-petal{
+    position:absolute;
+    top:-30px;
+    width:10px; height:13px;
+    background:linear-gradient(150deg, var(--pink-mid), var(--pink));
+    border-radius:0 100% 0 100%;
+    opacity:0.7;
+    animation-name:fall, sway;
+    animation-timing-function:linear, ease-in-out;
+    animation-iteration-count:infinite, infinite;
+  }
+  @keyframes fall{
+    from{ transform:translateY(-5vh) rotate(0deg); }
+    to{ transform:translateY(105vh) rotate(340deg); }
+  }
+  @keyframes sway{
+    0%,100%{ margin-left:0; }
+    50%{ margin-left:26px; }
+  }
+
+  /* ================= ROSA FLORECIENTE — elemento firma ================= */
+  .rose{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin:0 auto;
+  }
+  .petal{
+    position:absolute;
+    top:50%; left:50%;
+    width:90px; height:120px;
+    background:linear-gradient(150deg, var(--pink-mid), var(--pink-deep));
+    border-radius:0 100% 0 100%;
+    transform-origin:0% 100%;
+    opacity:0;
+    animation:bloom 1.4s cubic-bezier(.2,.9,.3,1.2) forwards;
+  }
+  .petal:nth-child(1){ transform:translate(-50%,-100%) rotate(0deg) scale(0.2); animation-delay:0.1s; }
+  .petal:nth-child(2){ transform:translate(-50%,-100%) rotate(60deg) scale(0.2); animation-delay:0.22s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
+  .petal:nth-child(3){ transform:translate(-50%,-100%) rotate(120deg) scale(0.2); animation-delay:0.34s; }
+  .petal:nth-child(4){ transform:translate(-50%,-100%) rotate(180deg) scale(0.2); animation-delay:0.46s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
+  .petal:nth-child(5){ transform:translate(-50%,-100%) rotate(240deg) scale(0.2); animation-delay:0.58s; }
+  .petal:nth-child(6){ transform:translate(-50%,-100%) rotate(300deg) scale(0.2); animation-delay:0.7s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
+
+  @keyframes bloom{
+    0%{ opacity:0; }
+    40%{ opacity:0.95; }
+    100%{
+      opacity:0.95;
+    }
+  }
+  .petal:nth-child(1){ animation-name:bloom1; }
+  .petal:nth-child(2){ animation-name:bloom2; }
+  .petal:nth-child(3){ animation-name:bloom3; }
+  .petal:nth-child(4){ animation-name:bloom4; }
+  .petal:nth-child(5){ animation-name:bloom5; }
+  .petal:nth-child(6){ animation-name:bloom6; }
+  @keyframes bloom1{ from{opacity:0; transform:translate(-50%,-100%) rotate(0deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(0deg) scale(1);} }
+  @keyframes bloom2{ from{opacity:0; transform:translate(-50%,-100%) rotate(60deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(60deg) scale(1);} }
+  @keyframes bloom3{ from{opacity:0; transform:translate(-50%,-100%) rotate(120deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(120deg) scale(1);} }
+  @keyframes bloom4{ from{opacity:0; transform:translate(-50%,-100%) rotate(180deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(180deg) scale(1);} }
+  @keyframes bloom5{ from{opacity:0; transform:translate(-50%,-100%) rotate(240deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(240deg) scale(1);} }
+  @keyframes bloom6{ from{opacity:0; transform:translate(-50%,-100%) rotate(300deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(300deg) scale(1);} }
+
+  .rose-center{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:38px; height:38px;
+    background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));
+    border-radius:50%;
+    z-index:5;
+    box-shadow:0 0 0 6px rgba(253,245,245,0.7);
+  }
+
+  /* ================= SCROLL REVEAL (genérico) ================= */
+  .reveal{
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.in-view{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .reveal-left{ transform:translateX(-40px); }
+  .reveal-left.in-view{ transform:translateX(0); }
+  .reveal-right{ transform:translateX(40px); }
+  .reveal-right.in-view{ transform:translateX(0); }
+  .reveal-scale{ transform:scale(0.9); }
+  .reveal-scale.in-view{ transform:scale(1); }
+
+  /* ================= CASCADA DEL HERO ================= */
+  .cascade > *{
+    opacity:0;
+    transform:translateY(16px);
+    animation:cascadeIn 0.8s ease forwards;
+  }
+  @keyframes cascadeIn{
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .cascade .eyebrow{ animation-delay:1.1s; }
+  .cascade .name{ animation-delay:1.25s; }
+  .cascade .subname{ animation-delay:1.55s; }
+  .cascade .padrinos{ animation-delay:1.75s; }
+  .cascade .date-tag{ animation-delay:1.95s; }
+
+  /* ================= HERO EDITORIAL ASIMÉTRICO ================= */
+  .hero{
+    min-height:100svh;
+    display:grid;
+    grid-template-columns:1fr;
+    align-items:center;
+    justify-items:center;
+    text-align:center;
+    padding:60px 24px 40px;
+    position:relative;
+  }
+
+  .eyebrow{
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:6px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.75;
+    margin-top:26px;
+  }
+
+  .name{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-style:normal;
+    font-size:clamp(44px, 11vw, 78px);
+    color:var(--pink-deep);
+    line-height:0.95;
+    margin:14px 0 6px;
+    letter-spacing:-1px;
+  }
+  .name em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--pink);
+  }
+
+  .subname{
+    font-size:clamp(15px,4vw,19px);
+    font-style:italic;
+    color:var(--ink);
+    opacity:0.6;
+    margin-bottom:8px;
+  }
+
+  .padrinos{
+    font-size:14px;
+    font-style:italic;
+    color:var(--ink);
+    opacity:0.5;
+    max-width:300px;
+    margin:0 auto 8px;
+    line-height:1.5;
+  }
+
+  .date-tag{
+    margin-top:26px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Montserrat', sans-serif;
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+  }
+  .date-tag .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+  }
+
+  /* ================= TALLO / LÍNEA DE TIEMPO ================= */
+  .stem-wrap{
+    max-width:640px;
+    margin:0 auto;
+    position:relative;
+    padding:0 24px;
+  }
+  .stem-line{
+    position:absolute;
+    left:50%;
+    top:0; bottom:0;
+    width:2px;
+    background:linear-gradient(180deg, transparent, var(--stem) 6%, var(--stem) 94%, transparent);
+    opacity:0.35;
+    transform:translateX(-50%);
+  }
+  .thorn{
+    position:absolute;
+    left:50%;
+    width:10px; height:10px;
+    background:var(--gold);
+    transform:translateX(-50%) rotate(45deg);
+    border-radius:2px;
+  }
+
+  /* ================= CUENTA REGRESIVA — capullo ================= */
+  .countdown-block{
+    text-align:center;
+    padding:90px 24px 70px;
+    position:relative;
+    z-index:1;
+  }
+  .countdown-title{
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.7;
+    margin-bottom:30px;
+  }
+  .countdown{
+    display:inline-flex;
+    gap:0;
+    background:#fff;
+    border-radius:100px;
+    padding:6px;
+    box-shadow:0 14px 34px rgba(199,107,143,0.14);
+  }
+  .cd-unit{
+    padding:16px 20px;
+    text-align:center;
+    position:relative;
+  }
+  .cd-unit:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    right:0; top:50%;
+    transform:translateY(-50%);
+    width:1px; height:24px;
+    background:var(--blush);
+  }
+  .cd-number{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(24px,6vw,30px);
+    color:var(--pink-deep);
+    line-height:1;
+    display:inline-block;
+  }
+  .cd-number.flip{
+    animation:numberFlip 0.4s ease;
+  }
+  @keyframes numberFlip{
+    0%{ transform:translateY(0); opacity:1; }
+    45%{ transform:translateY(-8px); opacity:0.3; }
+    55%{ transform:translateY(8px); opacity:0.3; }
+    100%{ transform:translateY(0); opacity:1; }
+  }
+  .cd-label{
+    font-family:'Montserrat', sans-serif;
+    font-size:8px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.55;
+    margin-top:6px;
+  }
+
+  /* ================= EVENTOS — bloques asimétricos alternados ================= */
+  .timeline{
+    position:relative;
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 24px 90px;
+  }
+  .t-line{
+    position:absolute;
+    left:50%;
+    top:20px; bottom:90px;
+    width:2px;
+    background:var(--blush);
+    transform:translateX(-50%);
+  }
+  .t-item{
+    position:relative;
+    width:calc(50% - 34px);
+    margin-bottom:56px;
+  }
+  .t-item.right{ margin-left:calc(50% + 34px); }
+  .t-item.left{ margin-left:0; text-align:right; }
+
+  .t-node{
+    position:absolute;
+    top:6px;
+    width:14px; height:14px;
+    border-radius:50%;
+    background:var(--pink-deep);
+    border:3px solid var(--cream);
+    box-shadow:0 0 0 1px var(--pink-deep);
+  }
+  .t-item.in-view .t-node{
+    animation:nodePulse 0.6s ease;
+  }
+  @keyframes nodePulse{
+    0%{ box-shadow:0 0 0 1px var(--pink-deep); }
+    50%{ box-shadow:0 0 0 8px rgba(154,63,102,0.15); }
+    100%{ box-shadow:0 0 0 1px var(--pink-deep); }
+  }
+  .t-item.right .t-node{ left:-41px; }
+  .t-item.left .t-node{ right:-41px; }
+
+  .t-eyebrow{
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.6;
+    margin-bottom:6px;
+  }
+  .t-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:24px;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .t-time{
+    font-size:16px;
+    font-style:italic;
+    color:var(--pink-deep);
+  }
+  .t-note{
+    font-family:'Montserrat', sans-serif;
+    font-size:12px;
+    color:var(--ink);
+    opacity:0.5;
+    margin-top:6px;
+  }
+  .t-map{
+    display:inline-flex;
+    margin-top:12px;
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    border-bottom:1px solid var(--pink-deep);
+    text-decoration:none;
+    padding-bottom:2px;
+  }
+
+  .map-embed{
+    margin-top:14px;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 8px 20px rgba(199,107,143,0.15);
+    height:150px;
+    opacity:0;
+    transition:opacity 0.7s ease 0.35s;
+  }
+  .t-item.in-view .map-embed{
+    opacity:1;
+  }
+  .map-embed iframe{
+    width:100%; height:100%;
+    border:0;
+    display:block;
+  }
+
+  @media (max-width:560px){
+    .t-line{ left:16px; }
+    .t-item, .t-item.right, .t-item.left{
+      width:calc(100% - 50px);
+      margin-left:50px;
+      text-align:left;
+    }
+    .t-item.right .t-node, .t-item.left .t-node{ left:-38px; right:auto; }
+  }
+
+  /* ================= SECCIÓN INFO (rsvp) ================= */
+  .info-section{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 24px 90px;
+    text-align:center;
+  }
+  .section-heading{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:32px;
+    color:var(--pink-deep);
+    margin-bottom:6px;
+  }
+  .section-sub{
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.45;
+    margin-bottom:34px;
+  }
+
+  .rsvp-card{
+    margin-top:20px;
+    background:#fff;
+    border-radius:20px;
+    padding:44px 30px;
+    box-shadow:0 14px 34px rgba(199,107,143,0.12);
+  }
+  .rsvp-text{
+    font-size:17px;
+    color:var(--ink);
+    opacity:0.7;
+    max-width:340px;
+    margin:0 auto 22px;
+    line-height:1.55;
+  }
+  .rsvp-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:linear-gradient(135deg, var(--pink), var(--pink-deep));
+    color:#fff;
+    font-family:'Montserrat', sans-serif;
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:14px 30px;
+    border-radius:100px;
+    text-decoration:none;
+    box-shadow:0 10px 22px rgba(154,63,102,0.25);
+    transition:transform 0.2s ease;
+  }
+  .rsvp-btn:hover{ transform:translateY(-2px); }
+  .rsvp-deadline{
+    margin-top:16px;
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.5;
+  }
+
+  .rsvp-count-btn{
+    display:block;
+    margin:24px auto 0;
+    background:none;
+    border:1px solid var(--pink-deep);
+    color:var(--pink-deep);
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:12px 26px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .rsvp-count-btn:hover{ background:var(--pink-deep); color:#fff; }
+  .rsvp-count-btn.confirmed{
+    background:var(--pink-deep);
+    color:#fff;
+    cursor:default;
+  }
+
+  .rsvp-counter{
+    margin-top:14px;
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:1px;
+    color:var(--ink);
+    opacity:0.5;
+  }
+  .rsvp-counter span{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--pink-deep);
+  }
+
+  footer{
+    text-align:center;
+    padding:40px 24px 100px;
+  }
+  .footer-rose{
+    width:70px; height:70px;
+    margin:0 auto 24px;
+    transform:scale(0.32);
+  }
+  .footer-msg{
+    font-size:19px;
+    font-style:italic;
+    color:var(--pink-deep);
+    max-width:400px;
+    margin:0 auto 16px;
+    line-height:1.6;
+  }
+  .footer-name{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:26px;
+    color:var(--pink-deep);
+  }
+</style>
+</head>
+<body class="locked">
+
+<!-- ================= SOBRE ================= -->
+<div class="envelope-screen" id="envelopeScreen">
+  <div class="envelope" id="envelope">
+    <div class="env-letter">
+      <div class="l-mono">MF</div>
+      <div class="l-text">XV Años</div>
+    </div>
+    <div class="env-body"></div>
+    <div class="env-flap"></div>
+    <div class="env-seal">MF</div>
+  </div>
+  <p class="envelope-hint">Toca el sobre para abrir</p>
+</div>
+
+<div class="petals-field" id="petalsField" aria-hidden="true"></div>
+
+<section class="hero cascade">
+  <div class="rose">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="rose-center"></div>
+  </div>
+
+  <p class="eyebrow">Mis XV años</p>
+  <h1 class="name">Maria<br><em>Fernanda</em></h1>
+  <p class="subname">Te invito a celebrar conmigo</p>
+  <p class="padrinos">🔧 Con la bendición de mis padres Jesus Emmanuel Sandoval Rojas y Nereida Azucena Garcia Lopez</p>
+
+  <div class="date-tag">
+    <span class="dot"></span> 11 de julio de 2026 <span class="dot"></span>
+  </div>
+</section>
+
+<div class="countdown-block">
+  <p class="countdown-title reveal">Cuenta regresiva</p>
+  <div class="countdown reveal reveal-scale">
+    <div class="cd-unit"><div class="cd-number" id="cd-days">00</div><div class="cd-label">Días</div></div>
+    <div class="cd-unit"><div class="cd-number" id="cd-hours">00</div><div class="cd-label">Hrs</div></div>
+    <div class="cd-unit"><div class="cd-number" id="cd-minutes">00</div><div class="cd-label">Min</div></div>
+    <div class="cd-unit"><div class="cd-number" id="cd-seconds">00</div><div class="cd-label">Seg</div></div>
+  </div>
+</div>
+
+<div class="timeline">
+  <div class="t-line"></div>
+
+  <div class="t-item right reveal reveal-right">
+    <div class="t-node"></div>
+    <div class="t-eyebrow">5:00 p.m.</div>
+    <div class="t-title">Misa de Acción de Gracias</div>
+    <div class="t-time">Parroquia San Francisco de Asís</div>
+    <div class="map-embed">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.728046301514!2d-105.7795587245308!3d22.835044923299986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869ee2775831b849%3A0xe3b31e814663d30c!2sSan%20Francisco%20de%20As%C3%ADs!5e1!3m2!1ses-419!2smx!4v1782929659992!5m2!1ses-419!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+    <a class="t-map" href="https://maps.app.goo.gl/CnafpG7UGFRgdzh59" target="_blank" rel="noopener">Abrir en Google Maps</a>
+  </div>
+
+  <div class="t-item left reveal reveal-left">
+    <div class="t-node"></div>
+    <div class="t-eyebrow">7:00 p.m.</div>
+    <div class="t-title">Recepción</div>
+    <div class="t-time">Salón "El Candela"</div>
+    <div class="t-note">Cena, baile y celebración</div>
+    <div class="map-embed">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d919.3128849886799!2d-105.78431873042473!3d22.83018143474821!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869f1d87148fa26b%3A0xaf8f67fff05c2426!2sRevoluci%C3%B3n%2088%2C%20Emiliano%20Zapata%2C%2082400%20Escuinapa%20de%20Hidalgo%2C%20Sin.!5e0!3m2!1ses-419!2smx!4v1782931024671!5m2!1ses-419!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+    <a class="t-map" href="https://maps.app.goo.gl/vS232k6XZg5gLojj8" target="_blank" rel="noopener">Abrir en Google Maps</a>
+  </div>
+</div>
+
+<div class="info-section">
+  <div class="rsvp-card reveal">
+    <p class="rsvp-text">Tu presencia hará este día aún más especial. Por favor confirma antes de la fecha límite.</p>
+    <a class="rsvp-btn" href="https://wa.me/525500000000?text=¡Hola!%20Confirmo%20mi%20asistencia%20a%20los%20XV%20años%20de%20Maria%20Fernanda" target="_blank" rel="noopener">Confirmar por WhatsApp</a>
+    <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
+
+    <button class="rsvp-count-btn" id="confirmCountBtn">✓ Ya voy a asistir</button>
+    <p class="rsvp-counter">
+      <span id="rsvpCount">—</span> invitados ya confirmaron
+    </p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-rose rose">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="rose-center"></div>
+  </div>
+  <p class="footer-msg">"Con la bendición de Dios y de mis padres, quiero compartir contigo este día tan especial."</p>
+  <p class="footer-name">Maria Fernanda</p>
+</footer>
+
+<script>
+  // Evita que el navegador restaure una posición de scroll anterior
+  if('scrollRestoration' in history){ history.scrollRestoration = 'manual'; }
+  window.scrollTo(0, 0);
+
+  // ---------- Apertura del sobre ----------
+  const envelope = document.getElementById('envelope');
+  const envelopeScreen = document.getElementById('envelopeScreen');
+  const body = document.body;
+
+  function openEnvelope(){
+    if(envelope.classList.contains('open')) return;
+    envelope.classList.add('open');
+    if(navigator.vibrate) navigator.vibrate(15);
+    window.scrollTo(0, 0);
+    setTimeout(()=>{
+      envelopeScreen.classList.add('hidden');
+      body.classList.remove('locked');
+      window.scrollTo(0, 0);
+    }, 900);
+  }
+
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEnvelope(); }
+  });
+  envelope.setAttribute('tabindex','0');
+  envelope.setAttribute('role','button');
+  envelope.setAttribute('aria-label','Abrir invitación');
+
+  // ---------- Pétalos cayendo (ambiente) ----------
+  const petalsField = document.getElementById('petalsField');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if(!prefersReducedMotion){
+    const PETAL_COUNT = 14;
+    for(let i=0; i<PETAL_COUNT; i++){
+      const petal = document.createElement('div');
+      petal.className = 'falling-petal';
+      const left = Math.random()*100;
+      const fallDuration = 9 + Math.random()*8;
+      const swayDuration = 3 + Math.random()*2;
+      const delay = Math.random()*12;
+      const size = 8 + Math.random()*6;
+      petal.style.left = left+'vw';
+      petal.style.width = size+'px';
+      petal.style.height = (size*1.3)+'px';
+      petal.style.animationDuration = fallDuration+'s, '+swayDuration+'s';
+      petal.style.animationDelay = (-delay)+'s, '+(-delay)+'s';
+      petalsField.appendChild(petal);
+    }
+  }
+
+  // ---------- Scroll reveal ----------
+  const revealEls = document.querySelectorAll('.reveal, .t-item');
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  // ---------- Cuenta regresiva ----------
+  const targetDate = new Date('2026-07-11T17:00:00');
+
+  function updateCountdown(){
+    const now = new Date();
+    let diff = targetDate - now;
+
+    if(diff <= 0){
+      ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(id=>{
+        setCountdownValue(id, '00');
+      });
+      return;
+    }
+
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const seconds = Math.floor((diff % (1000*60)) / 1000);
+
+    setCountdownValue('cd-days', String(days).padStart(2,'0'));
+    setCountdownValue('cd-hours', String(hours).padStart(2,'0'));
+    setCountdownValue('cd-minutes', String(minutes).padStart(2,'0'));
+    setCountdownValue('cd-seconds', String(seconds).padStart(2,'0'));
+  }
+
+  function setCountdownValue(id, value){
+    const el = document.getElementById(id);
+    if(el.textContent !== value){
+      el.textContent = value;
+      el.classList.remove('flip');
+      void el.offsetWidth; // reinicia la animación
+      el.classList.add('flip');
+    }
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ---------- Contador de confirmados ----------
+  const confirmBtn = document.getElementById('confirmCountBtn');
+  const rsvpCountEl = document.getElementById('rsvpCount');
+  const RSVP_KEY = 'xv-maria-fernanda-rsvp-count';
+  const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
+
+  const hasSharedStorage = typeof window.storage !== 'undefined';
+
+  async function loadCount(){
+    try{
+      if(hasSharedStorage){
+        const result = await window.storage.get(RSVP_KEY, true);
+        return result ? parseInt(result.value, 10) : 0;
+      } else {
+        return parseInt(localStorage.getItem(RSVP_KEY) || '0', 10);
+      }
+    }catch(err){
+      return parseInt(localStorage.getItem(RSVP_KEY) || '0', 10);
+    }
+  }
+
+  async function saveCount(count){
+    try{
+      if(hasSharedStorage){
+        await window.storage.set(RSVP_KEY, String(count), true);
+      }
+    }catch(err){ /* ignore */ }
+    localStorage.setItem(RSVP_KEY, String(count));
+  }
+
+  async function initCounter(){
+    const count = await loadCount();
+    rsvpCountEl.textContent = count;
+
+    if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
+      confirmBtn.textContent = '✓ Ya confirmaste';
+      confirmBtn.classList.add('confirmed');
+      confirmBtn.disabled = true;
+    }
+  }
+
+  confirmBtn.addEventListener('click', async ()=>{
+    if(localStorage.getItem(CONFIRMED_KEY) === 'true') return;
+    const current = await loadCount();
+    const updated = current + 1;
+    await saveCount(updated);
+    animateCountUp(current, updated);
+    localStorage.setItem(CONFIRMED_KEY, 'true');
+    confirmBtn.textContent = '✓ Ya confirmaste';
+    confirmBtn.classList.add('confirmed');
+    confirmBtn.disabled = true;
+  });
+
+  function animateCountUp(from, to){
+    const duration = 500;
+    const start = performance.now();
+    function step(now){
+      const progress = Math.min((now - start) / duration, 1);
+      const value = Math.round(from + (to - from) * progress);
+      rsvpCountEl.textContent = value;
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  initCounter();
+</script>
+
+</body>
+</html>
