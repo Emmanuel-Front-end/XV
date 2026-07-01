@@ -858,6 +858,21 @@
     border-radius:100px;
     cursor:pointer;
   }
+  .admin-reset{
+    display:block;
+    margin:14px auto 0;
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#b3435a;
+    background:#fff;
+    border:1px solid #e8b8c2;
+    padding:10px 24px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .admin-reset:hover{ background:#b3435a; color:#fff; }
   .footer-rose{
     width:70px; height:70px;
     margin:0 auto 24px;
@@ -910,6 +925,7 @@
   <div class="admin-list" id="adminList"></div>
 
   <button class="admin-refresh" id="adminRefresh">↻ Actualizar</button>
+  <button class="admin-reset" id="adminReset">🗑 Reiniciar contador</button>
 </div>
 
 <div class="petals-field" id="petalsField" aria-hidden="true"></div>
@@ -974,7 +990,7 @@
     <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
 
     <div class="rsvp-form" id="rsvpForm">
-      <input type="text" class="rsvp-input" id="guestName" placeholder="Nombre de Familares" maxlength="60">
+      <input type="text" class="rsvp-input" id="guestName" placeholder="Tu nombre (opcional)" maxlength="60">
 
       <div class="rsvp-stepper">
         <span class="stepper-label">¿Cuántos van a asistir?</span>
@@ -1047,6 +1063,7 @@
     const adminTotal = document.getElementById('adminTotal');
     const adminList = document.getElementById('adminList');
     const adminRefresh = document.getElementById('adminRefresh');
+    const adminReset = document.getElementById('adminReset');
 
     async function render(){
       const data = await getAdminData();
@@ -1062,7 +1079,26 @@
       ).join('');
     }
 
+    async function resetCounter(){
+      const confirmReset = window.confirm('¿Seguro que quieres reiniciar el contador? Esto borra todas las confirmaciones registradas hasta ahora y no se puede deshacer.');
+      if(!confirmReset) return;
+
+      try{
+        if(typeof window.storage !== 'undefined'){
+          await window.storage.set('xv-maria-fernanda-rsvp-count', '0', true);
+          await window.storage.set('xv-maria-fernanda-rsvp-names', '[]', true);
+        }
+      }catch(err){ /* ignore */ }
+
+      localStorage.setItem('xv-maria-fernanda-rsvp-count', '0');
+      localStorage.setItem('xv-maria-fernanda-rsvp-names', '[]');
+      localStorage.removeItem('xv-maria-fernanda-confirmed');
+
+      render();
+    }
+
     adminRefresh.addEventListener('click', render);
+    adminReset.addEventListener('click', resetCounter);
     render();
   }
 
