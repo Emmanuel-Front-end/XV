@@ -1029,6 +1029,16 @@
 
   // ---------- Panel de administrador (acceso secreto) ----------
   const ADMIN_SECRET = 'mf2026'; // 🔧 cámbialo por una palabra secreta solo tuya
+
+  // ---------- Conexión a Supabase (PostgreSQL) ----------
+  const SUPABASE_URL = 'https://cfabxxomemetafynaihs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmYWJ4eG9tZW1ldGFmeW5haWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5Mzc1MDAsImV4cCI6MjA5ODUxMzUwMH0.7Utm_EwgkjgZgXq-TWeqisbVEkXP035EBnWLARi6yV8';
+  const SUPABASE_HEADERS = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+  };
+
   const params = new URLSearchParams(window.location.search);
   const isAdmin = params.get('admin') === ADMIN_SECRET;
 
@@ -1041,19 +1051,14 @@
 
   async function getAdminData(){
     try{
-      if(typeof window.storage !== 'undefined'){
-        const countResult = await window.storage.get('xv-maria-fernanda-rsvp-count', true).catch(()=>null);
-        const namesResult = await window.storage.get('xv-maria-fernanda-rsvp-names', true).catch(()=>null);
-        return {
-          count: countResult ? parseInt(countResult.value, 10) : 0,
-          names: namesResult ? JSON.parse(namesResult.value) : []
-        };
-      } else {
-        return {
-          count: parseInt(localStorage.getItem('xv-maria-fernanda-rsvp-count') || '0', 10),
-          names: JSON.parse(localStorage.getItem('xv-maria-fernanda-rsvp-names') || '[]')
-        };
-      }
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/confirmaciones?select=nombre,personas&order=creado_en.asc`,
+        { headers: SUPABASE_HEADERS }
+      );
+      const rows = await res.json();
+      const count = rows.reduce((sum, row) => sum + row.personas, 0);
+      const names = rows.map(row => row.nombre);
+      return { count, names };
     }catch(err){
       return { count: 0, names: [] };
     }
@@ -1084,16 +1089,13 @@
       if(!confirmReset) return;
 
       try{
-        if(typeof window.storage !== 'undefined'){
-          await window.storage.set('xv-maria-fernanda-rsvp-count', '0', true);
-          await window.storage.set('xv-maria-fernanda-rsvp-names', '[]', true);
-        }
+        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=gt.0`, {
+          method: 'DELETE',
+          headers: SUPABASE_HEADERS
+        });
       }catch(err){ /* ignore */ }
 
-      localStorage.setItem('xv-maria-fernanda-rsvp-count', '0');
-      localStorage.setItem('xv-maria-fernanda-rsvp-names', '[]');
       localStorage.removeItem('xv-maria-fernanda-confirmed');
-
       render();
     }
 
@@ -1215,12 +1217,8 @@
   });
   const rsvpError = document.getElementById('rsvpError');
 
-  const RSVP_KEY = 'xv-maria-fernanda-rsvp-count';
-  const RSVP_NAMES_KEY = 'xv-maria-fernanda-rsvp-names';
   const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
   const WHATSAPP_NUMBER = '526951093237'; // 🔧 reemplaza con el número real, formato: 52 + LADA + número
-
-  const hasSharedStorage = typeof window.storage !== 'undefined';
 
   // ---------- Stepper de cantidad de invitados ----------
   const MAX_GUESTS = 5;
@@ -1242,66 +1240,35 @@
   });
   renderStepper();
 
-  async function loadCount(){
+  // ---------- Lectura y escritura en Supabase (PostgreSQL real) ----------
+  async function fetchConfirmations(){
     try{
-      if(hasSharedStorage){
-        const result = await window.storage.get(RSVP_KEY, true);
-        return result ? parseInt(result.value, 10) : 0;
-      } else {
-        return parseInt(localStorage.getItem(RSVP_KEY) || '0', 10);
-      }
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/confirmaciones?select=nombre,personas&order=creado_en.asc`,
+        { headers: SUPABASE_HEADERS }
+      );
+      const rows = await res.json();
+      const count = rows.reduce((sum, row) => sum + row.personas, 0);
+      const names = rows.map(row => row.nombre);
+      return { count, names };
     }catch(err){
-      return parseInt(localStorage.getItem(RSVP_KEY) || '0', 10);
+      return { count: 0, names: [] };
     }
   }
 
-  async function saveCount(count){
+  async function insertConfirmation(nombre, personas){
     try{
-      if(hasSharedStorage){
-        await window.storage.set(RSVP_KEY, String(count), true);
-      }
+      await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`, {
+        method: 'POST',
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ nombre, personas })
+      });
     }catch(err){ /* ignore */ }
-    localStorage.setItem(RSVP_KEY, String(count));
-  }
-
-  async function saveNames(newNames){
-    try{
-      if(hasSharedStorage){
-        const existing = await window.storage.get(RSVP_NAMES_KEY, true).catch(()=>null);
-        const list = existing ? JSON.parse(existing.value) : [];
-        list.push(...newNames);
-        await window.storage.set(RSVP_NAMES_KEY, JSON.stringify(list), true);
-        return list;
-      } else {
-        const existing = JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
-        existing.push(...newNames);
-        localStorage.setItem(RSVP_NAMES_KEY, JSON.stringify(existing));
-        return existing;
-      }
-    }catch(err){
-      const existing = JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
-      existing.push(...newNames);
-      localStorage.setItem(RSVP_NAMES_KEY, JSON.stringify(existing));
-      return existing;
-    }
-  }
-
-  async function loadNames(){
-    try{
-      if(hasSharedStorage){
-        const result = await window.storage.get(RSVP_NAMES_KEY, true);
-        return result ? JSON.parse(result.value) : [];
-      } else {
-        return JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
-      }
-    }catch(err){
-      return JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
-    }
   }
 
   async function initCounter(){
-    const count = await loadCount();
-    rsvpCountEl.textContent = count;
+    const data = await fetchConfirmations();
+    rsvpCountEl.textContent = data.count;
 
     if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
       showConfirmedState();
@@ -1321,14 +1288,13 @@
     const guestLabel = typedName ? `Fam. ${typedName}` : 'Invitado sin nombre';
     const displayLabel = guestQty > 1 ? `${guestLabel} (${guestQty} personas)` : guestLabel;
 
-    const current = await loadCount();
-    const updated = current + guestQty;
+    const before = await fetchConfirmations();
 
-    await saveCount(updated);
-    // Se guarda una sola entrada por familia/invitación, sin repetir por cada persona
-    const allNames = await saveNames([displayLabel]);
+    await insertConfirmation(displayLabel, guestQty);
 
-    animateCountUp(current, updated);
+    const after = await fetchConfirmations();
+
+    animateCountUp(before.count, after.count);
     localStorage.setItem(CONFIRMED_KEY, 'true');
     showConfirmedState();
 
@@ -1336,8 +1302,8 @@
     let message = `¡Hola! Confirmo mi asistencia a los XV años de Maria Fernanda 🌸\n\n`;
     message += `${typedName ? guestLabel + '\n' : ''}`;
     message += `Número de personas: ${guestQty}\n`;
-    message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
-    message += allNames.map(n => `• ${n}`).join('\n');
+    message += `\nHasta ahora somos ${after.count} invitados confirmados:\n`;
+    message += after.names.map(n => `• ${n}`).join('\n');
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank', 'noopener');
