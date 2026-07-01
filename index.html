@@ -840,6 +840,35 @@
   .admin-list-name{
     flex:1;
   }
+  .admin-qty{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .admin-qty-btn{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1px solid var(--pink-deep);
+    background:#fff;
+    color:var(--pink-deep);
+    font-size:13px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .admin-qty-btn:hover{ background:var(--pink-deep); color:#fff; }
+  .admin-qty-value{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--pink-deep);
+    min-width:14px;
+    text-align:center;
+  }
   .admin-list-delete{
     background:none;
     border:1px solid #e8b8c2;
@@ -1098,6 +1127,11 @@
         `<div class="admin-list-item">
           <span class="admin-list-index">${i+1}</span>
           <span class="admin-list-name">${row.nombre}</span>
+          <div class="admin-qty">
+            <button class="admin-qty-btn" data-action="minus" data-id="${row.id}" data-qty="${row.personas}">−</button>
+            <span class="admin-qty-value">${row.personas}</span>
+            <button class="admin-qty-btn" data-action="plus" data-id="${row.id}" data-qty="${row.personas}">+</button>
+          </div>
           <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
         </div>`
       ).join('');
@@ -1105,6 +1139,35 @@
       adminList.querySelectorAll('.admin-list-delete').forEach(btn=>{
         btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
       });
+
+      adminList.querySelectorAll('.admin-qty-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.dataset.id;
+          const currentQty = parseInt(btn.dataset.qty, 10);
+          const newQty = btn.dataset.action === 'minus' ? currentQty - 1 : currentQty + 1;
+          adjustQuantity(id, currentQty, newQty);
+        });
+      });
+    }
+
+    async function adjustQuantity(id, currentQty, newQty){
+      if(newQty <= 0){
+        deleteEntry(id);
+        return;
+      }
+      if(newQty > 5){
+        alert('El máximo por invitación es 5 personas.');
+        return;
+      }
+      try{
+        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ personas: newQty })
+        });
+      }catch(err){ /* ignore */ }
+
+      render();
     }
 
     async function deleteEntry(id){
@@ -1139,6 +1202,9 @@
     adminRefresh.addEventListener('click', render);
     adminReset.addEventListener('click', resetCounter);
     render();
+
+    // Se actualiza solo cada 5 segundos, sin necesidad de tocar nada
+    setInterval(render, 5000);
   }
 
   // ---------- Apertura del sobre ----------
