@@ -637,6 +637,57 @@
     cursor:default;
   }
 
+  .rsvp-form{
+    margin-top:24px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:320px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .rsvp-form.hidden{ display:none; }
+
+  .rsvp-input{
+    font-family:'Cormorant Garamond', serif;
+    font-size:16px;
+    color:var(--ink);
+    background:var(--cream);
+    border:1px solid var(--blush);
+    border-radius:10px;
+    padding:12px 16px;
+    outline:none;
+    transition:border-color 0.2s ease;
+  }
+  .rsvp-input:focus{ border-color:var(--pink-deep); }
+  .rsvp-input::placeholder{ color:var(--ink); opacity:0.4; }
+
+  .rsvp-checkbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    justify-content:center;
+    font-family:'Montserrat', sans-serif;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--ink);
+    opacity:0.75;
+    cursor:pointer;
+  }
+  .rsvp-checkbox input{
+    width:16px; height:16px;
+    accent-color:var(--pink-deep);
+    cursor:pointer;
+  }
+
+  .rsvp-error{
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    color:#b3435a;
+    min-height:14px;
+    margin-top:-4px;
+  }
+
   .rsvp-counter{
     margin-top:14px;
     font-family:'Montserrat', sans-serif;
@@ -756,7 +807,20 @@
     <a class="rsvp-btn" href="https://wa.me/526951093237?text=¡Hola!%20Confirmo%20mi%20asistencia%20a%20los%20XV%20años%20de%20Maria%20Fernanda" target="_blank" rel="noopener">Confirmar por WhatsApp</a>
     <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
 
-    <button class="rsvp-count-btn" id="confirmCountBtn">✓ Ya voy a asistir</button>
+    <div class="rsvp-form" id="rsvpForm">
+      <input type="text" class="rsvp-input" id="guestName" placeholder="Tu nombre" maxlength="60">
+
+      <label class="rsvp-checkbox">
+        <input type="checkbox" id="hasCompanion">
+        <span>Llevaré un acompañante</span>
+      </label>
+
+      <input type="text" class="rsvp-input rsvp-companion" id="companionName" placeholder="Nombre del acompañante" maxlength="60" style="display:none;">
+
+      <button class="rsvp-count-btn" id="confirmCountBtn">✓ Confirmar asistencia</button>
+      <p class="rsvp-error" id="rsvpError"></p>
+    </div>
+
     <p class="rsvp-counter">
       <span id="rsvpCount">—</span> invitados ya confirmaron
     </p>
@@ -879,10 +943,22 @@
   // ---------- Contador de confirmados ----------
   const confirmBtn = document.getElementById('confirmCountBtn');
   const rsvpCountEl = document.getElementById('rsvpCount');
+  const rsvpForm = document.getElementById('rsvpForm');
+  const guestNameInput = document.getElementById('guestName');
+  const hasCompanionCheckbox = document.getElementById('hasCompanion');
+  const companionNameInput = document.getElementById('companionName');
+  const rsvpError = document.getElementById('rsvpError');
+
   const RSVP_KEY = 'xv-maria-fernanda-rsvp-count';
+  const RSVP_NAMES_KEY = 'xv-maria-fernanda-rsvp-names';
   const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
 
   const hasSharedStorage = typeof window.storage !== 'undefined';
+
+  hasCompanionCheckbox.addEventListener('change', ()=>{
+    companionNameInput.style.display = hasCompanionCheckbox.checked ? 'block' : 'none';
+    if(!hasCompanionCheckbox.checked) companionNameInput.value = '';
+  });
 
   async function loadCount(){
     try{
@@ -906,27 +982,60 @@
     localStorage.setItem(RSVP_KEY, String(count));
   }
 
+  async function saveNames(newNames){
+    try{
+      if(hasSharedStorage){
+        const existing = await window.storage.get(RSVP_NAMES_KEY, true).catch(()=>null);
+        const list = existing ? JSON.parse(existing.value) : [];
+        list.push(...newNames);
+        await window.storage.set(RSVP_NAMES_KEY, JSON.stringify(list), true);
+      }
+    }catch(err){ /* ignore */ }
+  }
+
   async function initCounter(){
     const count = await loadCount();
     rsvpCountEl.textContent = count;
 
     if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
-      confirmBtn.textContent = '✓ Ya confirmaste';
-      confirmBtn.classList.add('confirmed');
-      confirmBtn.disabled = true;
+      showConfirmedState();
     }
   }
 
-  confirmBtn.addEventListener('click', async ()=>{
-    if(localStorage.getItem(CONFIRMED_KEY) === 'true') return;
-    const current = await loadCount();
-    const updated = current + 1;
-    await saveCount(updated);
-    animateCountUp(current, updated);
-    localStorage.setItem(CONFIRMED_KEY, 'true');
+  function showConfirmedState(){
+    rsvpForm.classList.add('hidden');
     confirmBtn.textContent = '✓ Ya confirmaste';
     confirmBtn.classList.add('confirmed');
-    confirmBtn.disabled = true;
+  }
+
+  confirmBtn.addEventListener('click', async ()=>{
+    rsvpError.textContent = '';
+
+    const guestName = guestNameInput.value.trim();
+    if(!guestName){
+      rsvpError.textContent = 'Por favor escribe tu nombre';
+      guestNameInput.focus();
+      return;
+    }
+
+    const bringsCompanion = hasCompanionCheckbox.checked;
+    const companionName = companionNameInput.value.trim();
+    if(bringsCompanion && !companionName){
+      rsvpError.textContent = 'Escribe el nombre de tu acompañante';
+      companionNameInput.focus();
+      return;
+    }
+
+    const current = await loadCount();
+    const addCount = bringsCompanion ? 2 : 1;
+    const updated = current + addCount;
+
+    await saveCount(updated);
+    await saveNames(bringsCompanion ? [guestName, companionName] : [guestName]);
+
+    animateCountUp(current, updated);
+    localStorage.setItem(CONFIRMED_KEY, 'true');
+    showConfirmedState();
   });
 
   function animateCountUp(from, to){
