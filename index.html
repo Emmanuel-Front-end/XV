@@ -823,7 +823,8 @@
   .admin-list-item{
     display:flex;
     align-items:center;
-    gap:12px;
+    flex-wrap:wrap;
+    gap:10px;
     padding:14px 22px;
     border-bottom:1px solid var(--cream);
     font-size:17px;
@@ -882,6 +883,21 @@
     transition:background 0.2s ease, color 0.2s ease;
   }
   .admin-list-delete:hover{ background:#b3435a; color:#fff; }
+  .admin-fill{
+    font-family:'Montserrat', sans-serif;
+    font-size:9px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    background:var(--cream);
+    border:1px solid var(--gold-soft);
+    padding:5px 10px;
+    border-radius:100px;
+    cursor:pointer;
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+  .admin-fill:hover{ background:var(--gold-soft); }
   .admin-empty{
     text-align:center;
     font-style:italic;
@@ -1109,6 +1125,7 @@
   }
 
   async function initAdminPanel(){
+    const MAX_GUESTS_ADMIN = 5;
     const adminTotal = document.getElementById('adminTotal');
     const adminList = document.getElementById('adminList');
     const adminRefresh = document.getElementById('adminRefresh');
@@ -1132,6 +1149,7 @@
             <span class="admin-qty-value">${row.personas}</span>
             <button class="admin-qty-btn" data-action="plus" data-id="${row.id}" data-qty="${row.personas}">+</button>
           </div>
+          ${row.personas < MAX_GUESTS_ADMIN ? `<button class="admin-fill" data-id="${row.id}" data-qty="${row.personas}">Completar a ${MAX_GUESTS_ADMIN}</button>` : ''}
           <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
         </div>`
       ).join('');
@@ -1146,6 +1164,14 @@
           const currentQty = parseInt(btn.dataset.qty, 10);
           const newQty = btn.dataset.action === 'minus' ? currentQty - 1 : currentQty + 1;
           adjustQuantity(id, currentQty, newQty);
+        });
+      });
+
+      adminList.querySelectorAll('.admin-fill').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.dataset.id;
+          const currentQty = parseInt(btn.dataset.qty, 10);
+          adjustQuantity(id, currentQty, MAX_GUESTS_ADMIN);
         });
       });
     }
