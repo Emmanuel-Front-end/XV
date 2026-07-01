@@ -753,38 +753,6 @@
     color:var(--pink-deep);
   }
 
-  .missing-notice{
-    margin-top:20px;
-    padding:18px;
-    background:var(--blush);
-    border-radius:14px;
-    text-align:center;
-  }
-  .missing-notice p{
-    font-size:14px;
-    color:var(--ink);
-    opacity:0.75;
-    margin-bottom:12px;
-    line-height:1.5;
-  }
-  .missing-notice span{
-    font-weight:600;
-    color:var(--pink-deep);
-  }
-  .missing-btn{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:#fff;
-    background:var(--pink-deep);
-    border:none;
-    padding:10px 20px;
-    border-radius:100px;
-    cursor:pointer;
-  }
-  .missing-btn:hover{ opacity:0.9; }
-
   footer{
     text-align:center;
     padding:40px 24px 100px;
@@ -1102,11 +1070,6 @@
     <p class="rsvp-counter">
       <span id="rsvpCount">—</span> invitados ya confirmaron
     </p>
-
-    <div class="missing-notice" id="missingNotice" style="display:none;">
-      <p>Tu confirmación cambió: ahora aparecen <span id="missingCurrent"></span> de las <span id="missingOriginal"></span> personas que confirmaste.</p>
-      <button class="missing-btn" id="addMissingBtn">+ Agregar las <span id="missingCount"></span> que faltan</button>
-    </div>
   </div>
 </div>
 
@@ -1150,7 +1113,7 @@
   async function getAdminData(){
     try{
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?select=id,nombre,personas&order=creado_en.asc`,
+        `${SUPABASE_URL}/rest/v1/confirmaciones?select=id,nombre,personas,personas_original&order=creado_en.asc`,
         { headers: SUPABASE_HEADERS }
       );
       const rows = await res.json();
@@ -1177,8 +1140,10 @@
         return;
       }
 
-      adminList.innerHTML = data.rows.map((row, i) =>
-        `<div class="admin-list-item">
+      adminList.innerHTML = data.rows.map((row, i) => {
+        const original = row.personas_original || row.personas;
+        const showRestore = row.personas < original;
+        return `<div class="admin-list-item">
           <span class="admin-list-index">${i+1}</span>
           <span class="admin-list-name">${row.nombre}</span>
           <div class="admin-qty">
@@ -1186,10 +1151,10 @@
             <span class="admin-qty-value">${row.personas}</span>
             <button class="admin-qty-btn" data-action="plus" data-id="${row.id}" data-qty="${row.personas}">+</button>
           </div>
-          ${row.personas < MAX_GUESTS_ADMIN ? `<button class="admin-fill" data-id="${row.id}" data-qty="${row.personas}">Completar a ${MAX_GUESTS_ADMIN}</button>` : ''}
+          ${showRestore ? `<button class="admin-fill" data-id="${row.id}" data-qty="${row.personas}" data-restore="${original}">Completar a ${original} (faltan ${original - row.personas})</button>` : ''}
           <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
 
       adminList.querySelectorAll('.admin-list-delete').forEach(btn=>{
         btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
@@ -1208,7 +1173,8 @@
         btn.addEventListener('click', ()=>{
           const id = btn.dataset.id;
           const currentQty = parseInt(btn.dataset.qty, 10);
-          adjustQuantity(id, currentQty, MAX_GUESTS_ADMIN);
+          const restoreQty = parseInt(btn.dataset.restore, 10);
+          adjustQuantity(id, currentQty, restoreQty);
         });
       });
     }
@@ -1384,8 +1350,6 @@
   const rsvpError = document.getElementById('rsvpError');
 
   const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
-  const CONFIRMED_ID_KEY = 'xv-maria-fernanda-confirmed-id';
-  const CONFIRMED_QTY_KEY = 'xv-maria-fernanda-confirmed-qty';
   const WHATSAPP_NUMBER = '526951093237'; // 🔧 reemplaza con el número real, formato: 52 + LADA + número
 
   // ---------- Stepper de cantidad de invitados ----------
@@ -1426,16 +1390,12 @@
 
   async function insertConfirmation(nombre, personas){
     try{
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`, {
         method: 'POST',
-        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=representation' },
-        body: JSON.stringify({ nombre, personas })
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ nombre, personas, personas_original: personas })
       });
-      const rows = await res.json();
-      return rows && rows[0] ? rows[0].id : null;
-    }catch(err){
-      return null;
-    }
+    }catch(err){ /* ignore */ }
   }
 
   async function initCounter(){
@@ -1444,7 +1404,6 @@
 
     if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
       showConfirmedState();
-      await checkMyOwnRow();
     }
 
     // Revisa el contador cada 5 segundos: mantiene el número al día,
@@ -1456,76 +1415,15 @@
 
       if(latest.count === 0 && localStorage.getItem(CONFIRMED_KEY) === 'true'){
         localStorage.removeItem(CONFIRMED_KEY);
-        localStorage.removeItem(CONFIRMED_ID_KEY);
-        localStorage.removeItem(CONFIRMED_QTY_KEY);
         rsvpForm.classList.remove('hidden');
         confirmBtn.textContent = '💬 Confirmar y enviar por WhatsApp';
         confirmBtn.classList.remove('confirmed');
         guestNameInput.value = '';
         guestQty = 1;
         renderStepper();
-        missingNotice.style.display = 'none';
-        return;
       }
-
-      await checkMyOwnRow();
     }, 5000);
   }
-
-  // ---------- Detecta si el admin redujo la cantidad de este invitado ----------
-  const missingNotice = document.getElementById('missingNotice');
-  const missingCurrent = document.getElementById('missingCurrent');
-  const missingOriginal = document.getElementById('missingOriginal');
-  const missingCount = document.getElementById('missingCount');
-  const addMissingBtn = document.getElementById('addMissingBtn');
-
-  async function checkMyOwnRow(){
-    const myId = localStorage.getItem(CONFIRMED_ID_KEY);
-    const myOriginalQty = parseInt(localStorage.getItem(CONFIRMED_QTY_KEY) || '0', 10);
-    if(!myId || !myOriginalQty) return;
-
-    try{
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${myId}&select=personas`,
-        { headers: SUPABASE_HEADERS }
-      );
-      const rows = await res.json();
-
-      if(rows.length === 0){
-        // El admin borró la confirmación por completo
-        missingNotice.style.display = 'none';
-        return;
-      }
-
-      const currentQty = rows[0].personas;
-      if(currentQty < myOriginalQty){
-        missingCurrent.textContent = currentQty;
-        missingOriginal.textContent = myOriginalQty;
-        missingCount.textContent = myOriginalQty - currentQty;
-        missingNotice.style.display = 'block';
-      } else {
-        missingNotice.style.display = 'none';
-      }
-    }catch(err){ /* ignore */ }
-  }
-
-  addMissingBtn.addEventListener('click', async ()=>{
-    const myId = localStorage.getItem(CONFIRMED_ID_KEY);
-    const myOriginalQty = parseInt(localStorage.getItem(CONFIRMED_QTY_KEY) || '0', 10);
-    if(!myId || !myOriginalQty) return;
-
-    try{
-      await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${myId}`, {
-        method: 'PATCH',
-        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ personas: myOriginalQty })
-      });
-    }catch(err){ /* ignore */ }
-
-    missingNotice.style.display = 'none';
-    const latest = await fetchConfirmations();
-    rsvpCountEl.textContent = latest.count;
-  });
 
   function showConfirmedState(){
     rsvpForm.classList.add('hidden');
@@ -1542,11 +1440,7 @@
 
     const before = await fetchConfirmations();
 
-    const insertedId = await insertConfirmation(displayLabel, guestQty);
-    if(insertedId){
-      localStorage.setItem(CONFIRMED_ID_KEY, insertedId);
-      localStorage.setItem(CONFIRMED_QTY_KEY, String(guestQty));
-    }
+    await insertConfirmation(displayLabel, guestQty);
 
     const after = await fetchConfirmations();
 
