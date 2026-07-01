@@ -837,6 +837,22 @@
     opacity:0.5;
     min-width:20px;
   }
+  .admin-list-name{
+    flex:1;
+  }
+  .admin-list-delete{
+    background:none;
+    border:1px solid #e8b8c2;
+    color:#b3435a;
+    width:26px; height:26px;
+    border-radius:50%;
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .admin-list-delete:hover{ background:#b3435a; color:#fff; }
   .admin-empty{
     text-align:center;
     font-style:italic;
@@ -1052,15 +1068,14 @@
   async function getAdminData(){
     try{
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?select=nombre,personas&order=creado_en.asc`,
+        `${SUPABASE_URL}/rest/v1/confirmaciones?select=id,nombre,personas&order=creado_en.asc`,
         { headers: SUPABASE_HEADERS }
       );
       const rows = await res.json();
       const count = rows.reduce((sum, row) => sum + row.personas, 0);
-      const names = rows.map(row => row.nombre);
-      return { count, names };
+      return { count, rows };
     }catch(err){
-      return { count: 0, names: [] };
+      return { count: 0, rows: [] };
     }
   }
 
@@ -1074,14 +1089,36 @@
       const data = await getAdminData();
       adminTotal.textContent = data.count;
 
-      if(data.names.length === 0){
+      if(data.rows.length === 0){
         adminList.innerHTML = '<p class="admin-empty">Aún no hay confirmaciones</p>';
         return;
       }
 
-      adminList.innerHTML = data.names.map((name, i) =>
-        `<div class="admin-list-item"><span class="admin-list-index">${i+1}</span><span>${name}</span></div>`
+      adminList.innerHTML = data.rows.map((row, i) =>
+        `<div class="admin-list-item">
+          <span class="admin-list-index">${i+1}</span>
+          <span class="admin-list-name">${row.nombre}</span>
+          <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
+        </div>`
       ).join('');
+
+      adminList.querySelectorAll('.admin-list-delete').forEach(btn=>{
+        btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
+      });
+    }
+
+    async function deleteEntry(id){
+      const confirmDelete = window.confirm('¿Borrar solo esta confirmación?');
+      if(!confirmDelete) return;
+
+      try{
+        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: SUPABASE_HEADERS
+        });
+      }catch(err){ /* ignore */ }
+
+      render();
     }
 
     async function resetCounter(){
