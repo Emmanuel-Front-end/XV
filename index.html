@@ -680,6 +680,56 @@
     cursor:pointer;
   }
 
+  .rsvp-stepper{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+  .stepper-label{
+    font-family:'Montserrat', sans-serif;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--ink);
+    opacity:0.7;
+  }
+  .stepper-controls{
+    display:flex;
+    align-items:center;
+    gap:22px;
+  }
+  .stepper-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--pink-deep);
+    background:#fff;
+    color:var(--pink-deep);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .stepper-btn:hover:not(:disabled){ background:var(--pink-deep); color:#fff; }
+  .stepper-btn:disabled{ opacity:0.3; cursor:default; }
+  .stepper-value{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:26px;
+    color:var(--pink-deep);
+    min-width:24px;
+    text-align:center;
+  }
+  .stepper-max{
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:1px;
+    color:var(--ink);
+    opacity:0.4;
+  }
+
   .rsvp-error{
     font-family:'Montserrat', sans-serif;
     font-size:11px;
@@ -706,6 +756,107 @@
   footer{
     text-align:center;
     padding:40px 24px 100px;
+  }
+
+  /* ================= PANEL DE ADMINISTRADOR ================= */
+  .admin-panel{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    background:var(--cream);
+    overflow-y:auto;
+    padding:40px 24px 80px;
+  }
+  .admin-header{
+    text-align:center;
+    margin-bottom:34px;
+  }
+  .admin-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:28px;
+    color:var(--pink-deep);
+  }
+  .admin-subtitle{
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:0.5;
+    margin-top:6px;
+  }
+  .admin-total{
+    max-width:400px;
+    margin:0 auto 30px;
+    background:#fff;
+    border-radius:16px;
+    padding:26px;
+    text-align:center;
+    box-shadow:0 10px 26px rgba(199,107,143,0.12);
+  }
+  .admin-total-number{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:44px;
+    color:var(--pink-deep);
+    line-height:1;
+  }
+  .admin-total-label{
+    font-family:'Montserrat', sans-serif;
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    opacity:0.6;
+    margin-top:6px;
+  }
+  .admin-list{
+    max-width:400px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:16px;
+    padding:10px 0;
+    box-shadow:0 10px 26px rgba(199,107,143,0.1);
+  }
+  .admin-list-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 22px;
+    border-bottom:1px solid var(--cream);
+    font-size:17px;
+    color:var(--ink);
+  }
+  .admin-list-item:last-child{ border-bottom:none; }
+  .admin-list-index{
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    color:var(--pink-deep);
+    opacity:0.5;
+    min-width:20px;
+  }
+  .admin-empty{
+    text-align:center;
+    font-style:italic;
+    color:var(--ink);
+    opacity:0.5;
+    padding:20px;
+  }
+  .admin-refresh{
+    display:block;
+    margin:26px auto 0;
+    font-family:'Montserrat', sans-serif;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--pink-deep);
+    background:#fff;
+    border:1px solid var(--gold-soft);
+    padding:10px 24px;
+    border-radius:100px;
+    cursor:pointer;
   }
   .footer-rose{
     width:70px; height:70px;
@@ -743,6 +894,22 @@
     <div class="env-seal">MF</div>
   </div>
   <p class="envelope-hint">Toca el sobre para abrir</p>
+</div>
+
+<div class="admin-panel" id="adminPanel" style="display:none;">
+  <div class="admin-header">
+    <p class="admin-title">Panel de confirmaciones</p>
+    <p class="admin-subtitle">Maria Fernanda · Mis XV años</p>
+  </div>
+
+  <div class="admin-total">
+    <div class="admin-total-number" id="adminTotal">0</div>
+    <div class="admin-total-label">Invitados confirmados</div>
+  </div>
+
+  <div class="admin-list" id="adminList"></div>
+
+  <button class="admin-refresh" id="adminRefresh">↻ Actualizar</button>
 </div>
 
 <div class="petals-field" id="petalsField" aria-hidden="true"></div>
@@ -804,20 +971,22 @@
 <div class="info-section">
   <div class="rsvp-card reveal">
     <p class="rsvp-text">Tu presencia hará este día aún más especial. Por favor confirma antes de la fecha límite.</p>
-    <a class="rsvp-btn" href="https://wa.me/526951093237?text=¡Hola!%20Confirmo%20mi%20asistencia%20a%20los%20XV%20años%20de%20Maria%20Fernanda" target="_blank" rel="noopener">Confirmar por WhatsApp</a>
     <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
 
     <div class="rsvp-form" id="rsvpForm">
-      <input type="text" class="rsvp-input" id="guestName" placeholder="Tu nombre" maxlength="60">
+      <input type="text" class="rsvp-input" id="guestName" placeholder="Nombre de Familares" maxlength="60">
 
-      <label class="rsvp-checkbox">
-        <input type="checkbox" id="hasCompanion">
-        <span>Llevaré un acompañante</span>
-      </label>
+      <div class="rsvp-stepper">
+        <span class="stepper-label">¿Cuántos van a asistir?</span>
+        <div class="stepper-controls">
+          <button type="button" class="stepper-btn" id="stepperMinus">−</button>
+          <span class="stepper-value" id="stepperValue">1</span>
+          <button type="button" class="stepper-btn" id="stepperPlus">+</button>
+        </div>
+        <span class="stepper-max">Máximo 5 personas por invitación</span>
+      </div>
 
-      <input type="text" class="rsvp-input rsvp-companion" id="companionName" placeholder="Nombre del acompañante" maxlength="60" style="display:none;">
-
-      <button class="rsvp-count-btn" id="confirmCountBtn">✓ Confirmar asistencia</button>
+      <button class="rsvp-count-btn" id="confirmCountBtn">💬 Confirmar y enviar por WhatsApp</button>
       <p class="rsvp-error" id="rsvpError"></p>
     </div>
 
@@ -841,6 +1010,61 @@
   // Evita que el navegador restaure una posición de scroll anterior
   if('scrollRestoration' in history){ history.scrollRestoration = 'manual'; }
   window.scrollTo(0, 0);
+
+  // ---------- Panel de administrador (acceso secreto) ----------
+  const ADMIN_SECRET = 'mf2026'; // 🔧 cámbialo por una palabra secreta solo tuya
+  const params = new URLSearchParams(window.location.search);
+  const isAdmin = params.get('admin') === ADMIN_SECRET;
+
+  if(isAdmin){
+    document.body.classList.remove('locked');
+    document.getElementById('envelopeScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    initAdminPanel();
+  }
+
+  async function getAdminData(){
+    try{
+      if(typeof window.storage !== 'undefined'){
+        const countResult = await window.storage.get('xv-maria-fernanda-rsvp-count', true).catch(()=>null);
+        const namesResult = await window.storage.get('xv-maria-fernanda-rsvp-names', true).catch(()=>null);
+        return {
+          count: countResult ? parseInt(countResult.value, 10) : 0,
+          names: namesResult ? JSON.parse(namesResult.value) : []
+        };
+      } else {
+        return {
+          count: parseInt(localStorage.getItem('xv-maria-fernanda-rsvp-count') || '0', 10),
+          names: JSON.parse(localStorage.getItem('xv-maria-fernanda-rsvp-names') || '[]')
+        };
+      }
+    }catch(err){
+      return { count: 0, names: [] };
+    }
+  }
+
+  async function initAdminPanel(){
+    const adminTotal = document.getElementById('adminTotal');
+    const adminList = document.getElementById('adminList');
+    const adminRefresh = document.getElementById('adminRefresh');
+
+    async function render(){
+      const data = await getAdminData();
+      adminTotal.textContent = data.count;
+
+      if(data.names.length === 0){
+        adminList.innerHTML = '<p class="admin-empty">Aún no hay confirmaciones</p>';
+        return;
+      }
+
+      adminList.innerHTML = data.names.map((name, i) =>
+        `<div class="admin-list-item"><span class="admin-list-index">${i+1}</span><span>${name}</span></div>`
+      ).join('');
+    }
+
+    adminRefresh.addEventListener('click', render);
+    render();
+  }
 
   // ---------- Apertura del sobre ----------
   const envelope = document.getElementById('envelope');
@@ -945,20 +1169,34 @@
   const rsvpCountEl = document.getElementById('rsvpCount');
   const rsvpForm = document.getElementById('rsvpForm');
   const guestNameInput = document.getElementById('guestName');
-  const hasCompanionCheckbox = document.getElementById('hasCompanion');
-  const companionNameInput = document.getElementById('companionName');
   const rsvpError = document.getElementById('rsvpError');
 
   const RSVP_KEY = 'xv-maria-fernanda-rsvp-count';
   const RSVP_NAMES_KEY = 'xv-maria-fernanda-rsvp-names';
   const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
+  const WHATSAPP_NUMBER = '526951093237'; // 🔧 reemplaza con el número real, formato: 52 + LADA + número
 
   const hasSharedStorage = typeof window.storage !== 'undefined';
 
-  hasCompanionCheckbox.addEventListener('change', ()=>{
-    companionNameInput.style.display = hasCompanionCheckbox.checked ? 'block' : 'none';
-    if(!hasCompanionCheckbox.checked) companionNameInput.value = '';
+  // ---------- Stepper de cantidad de invitados ----------
+  const MAX_GUESTS = 5;
+  let guestQty = 1;
+  const stepperValue = document.getElementById('stepperValue');
+  const stepperMinus = document.getElementById('stepperMinus');
+  const stepperPlus = document.getElementById('stepperPlus');
+
+  function renderStepper(){
+    stepperValue.textContent = guestQty;
+    stepperMinus.disabled = guestQty <= 1;
+    stepperPlus.disabled = guestQty >= MAX_GUESTS;
+  }
+  stepperMinus.addEventListener('click', ()=>{
+    if(guestQty > 1){ guestQty--; renderStepper(); }
   });
+  stepperPlus.addEventListener('click', ()=>{
+    if(guestQty < MAX_GUESTS){ guestQty++; renderStepper(); }
+  });
+  renderStepper();
 
   async function loadCount(){
     try{
@@ -989,8 +1227,32 @@
         const list = existing ? JSON.parse(existing.value) : [];
         list.push(...newNames);
         await window.storage.set(RSVP_NAMES_KEY, JSON.stringify(list), true);
+        return list;
+      } else {
+        const existing = JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
+        existing.push(...newNames);
+        localStorage.setItem(RSVP_NAMES_KEY, JSON.stringify(existing));
+        return existing;
       }
-    }catch(err){ /* ignore */ }
+    }catch(err){
+      const existing = JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
+      existing.push(...newNames);
+      localStorage.setItem(RSVP_NAMES_KEY, JSON.stringify(existing));
+      return existing;
+    }
+  }
+
+  async function loadNames(){
+    try{
+      if(hasSharedStorage){
+        const result = await window.storage.get(RSVP_NAMES_KEY, true);
+        return result ? JSON.parse(result.value) : [];
+      } else {
+        return JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
+      }
+    }catch(err){
+      return JSON.parse(localStorage.getItem(RSVP_NAMES_KEY) || '[]');
+    }
   }
 
   async function initCounter(){
@@ -1011,31 +1273,34 @@
   confirmBtn.addEventListener('click', async ()=>{
     rsvpError.textContent = '';
 
-    const guestName = guestNameInput.value.trim();
-    if(!guestName){
-      rsvpError.textContent = 'Por favor escribe tu nombre';
-      guestNameInput.focus();
-      return;
-    }
+    const typedName = guestNameInput.value.trim();
+    const guestLabel = typedName || 'Invitado sin nombre';
 
-    const bringsCompanion = hasCompanionCheckbox.checked;
-    const companionName = companionNameInput.value.trim();
-    if(bringsCompanion && !companionName){
-      rsvpError.textContent = 'Escribe el nombre de tu acompañante';
-      companionNameInput.focus();
-      return;
+    // Genera una entrada por cada persona confirmada según la cantidad elegida
+    const entries = [];
+    for(let i = 0; i < guestQty; i++){
+      entries.push(guestQty > 1 ? `${guestLabel} (grupo de ${guestQty})` : guestLabel);
     }
 
     const current = await loadCount();
-    const addCount = bringsCompanion ? 2 : 1;
-    const updated = current + addCount;
+    const updated = current + guestQty;
 
     await saveCount(updated);
-    await saveNames(bringsCompanion ? [guestName, companionName] : [guestName]);
+    const allNames = await saveNames(entries);
 
     animateCountUp(current, updated);
     localStorage.setItem(CONFIRMED_KEY, 'true');
     showConfirmedState();
+
+    // ---------- Construir y abrir mensaje de WhatsApp ----------
+    let message = `¡Hola! Confirmo mi asistencia a los XV años de Maria Fernanda 🌸\n\n`;
+    message += `${typedName ? 'Nombre: ' + typedName + '\n' : ''}`;
+    message += `Número de personas: ${guestQty}\n`;
+    message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
+    message += allNames.map(n => `• ${n}`).join('\n');
+
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank', 'noopener');
   });
 
   function animateCountUp(from, to){
