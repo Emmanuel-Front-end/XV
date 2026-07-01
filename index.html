@@ -990,7 +990,7 @@
     <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
 
     <div class="rsvp-form" id="rsvpForm">
-      <input type="text" class="rsvp-input" id="guestName" placeholder="Tu nombre (opcional)" maxlength="60">
+      <input type="text" class="rsvp-input" id="guestName" placeholder="Apellido de familia (ej. García López)" maxlength="60">
 
       <div class="rsvp-stepper">
         <span class="stepper-label">¿Cuántos van a asistir?</span>
@@ -1205,6 +1205,14 @@
   const rsvpCountEl = document.getElementById('rsvpCount');
   const rsvpForm = document.getElementById('rsvpForm');
   const guestNameInput = document.getElementById('guestName');
+  function toTitleCase(str){
+    return str.replace(/\S+/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+  }
+  guestNameInput.addEventListener('input', ()=>{
+    const cursorPos = guestNameInput.selectionStart;
+    guestNameInput.value = toTitleCase(guestNameInput.value);
+    guestNameInput.setSelectionRange(cursorPos, cursorPos);
+  });
   const rsvpError = document.getElementById('rsvpError');
 
   const RSVP_KEY = 'xv-maria-fernanda-rsvp-count';
@@ -1310,19 +1318,15 @@
     rsvpError.textContent = '';
 
     const typedName = guestNameInput.value.trim();
-    const guestLabel = typedName || 'Invitado sin nombre';
-
-    // Genera una entrada por cada persona confirmada según la cantidad elegida
-    const entries = [];
-    for(let i = 0; i < guestQty; i++){
-      entries.push(guestQty > 1 ? `${guestLabel} (grupo de ${guestQty})` : guestLabel);
-    }
+    const guestLabel = typedName ? `Fam. ${typedName}` : 'Invitado sin nombre';
+    const displayLabel = guestQty > 1 ? `${guestLabel} (${guestQty} personas)` : guestLabel;
 
     const current = await loadCount();
     const updated = current + guestQty;
 
     await saveCount(updated);
-    const allNames = await saveNames(entries);
+    // Se guarda una sola entrada por familia/invitación, sin repetir por cada persona
+    const allNames = await saveNames([displayLabel]);
 
     animateCountUp(current, updated);
     localStorage.setItem(CONFIRMED_KEY, 'true');
@@ -1330,10 +1334,10 @@
 
     // ---------- Construir y abrir mensaje de WhatsApp ----------
     let message = `¡Hola! Confirmo mi asistencia a los XV años de Maria Fernanda 🌸\n\n`;
-    message += `${typedName ? 'Nombre: ' + typedName + '\n' : ''}`;
+    message += `${typedName ? guestLabel + '\n' : ''}`;
     message += `Número de personas: ${guestQty}\n`;
-    // message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
-    // message += allNames.map(n => `• ${n}`).join('\n');
+    message += `\nHasta ahora somos ${updated} invitados confirmados:\n`;
+    message += allNames.map(n => `• ${n}`).join('\n');
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank', 'noopener');
