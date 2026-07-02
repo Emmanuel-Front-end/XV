@@ -1,1592 +1,440 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mis XV Años · Maria Fernanda</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,500&family=Cormorant+Garamond:ital@0;1&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --cream:#fdf5f5;
-    --pink:#c76b8f;
-    --pink-deep:#9a3f66;
-    --pink-mid:#dc8ba8;
-    --gold:#d9a86a;
-    --gold-soft:#f0d9b8;
-    --blush:#f3d3d9;
-    --ink:#3a2530;
-    --stem:#7a8c6a;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis XV Años · Maria Fernanda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-light: #f9e4c8;
+            --gold: #cfa35d;
+            --gold-deep: #a57a3a;
+            --ivory: #fdfaf7;
+            --pink-blush: #f2d8dc;
+            --pink: #c97a8e;
+            --pink-dark: #8c4357;
+            --crimson: #5c2a37;
+            --champagne: #f7ecd8;
+            --ink: #2e1e24;
+            --soft-white: #fffdfc;
+            --shadow-card: 0 30px 50px rgba(90, 40, 50, 0.12);
+            --shadow-lux: 0 12px 30px rgba(90, 40, 50, 0.18);
+            --radius-l: 22px;
+            --radius-xl: 30px;
+        }
 
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth; overflow-anchor:none;}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--ivory);
+            color: var(--ink);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        body.locked { overflow: hidden; height: 100svh; }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } html { scroll-snap-type: none; } }
 
-  body{
-    background:var(--cream);
-    color:var(--ink);
-    font-family:'Cormorant Garamond', serif;
-    overflow-x:hidden;
-  }
+        /* ================= SOBRE ================= */
+        .envelope-screen {
+            position: fixed; inset: 0; z-index: 100;
+            background: radial-gradient(circle at 50% 35%, #fff 0%, #f9ece5 60%, #f2ddd0 100%);
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 40px;
+            transition: opacity 0.9s ease, visibility 0.9s ease;
+        }
+        .envelope-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .envelope {
+            width: 320px; height: 220px; position: relative; cursor: pointer;
+            transition: transform 0.4s ease; perspective: 1200px;
+        }
+        .envelope:hover { transform: scale(1.03); }
+        .env-body {
+            position: absolute; inset: 0;
+            background: linear-gradient(145deg, #fffdf8, #f5e4d9);
+            border-radius: 12px; box-shadow: 0 30px 45px rgba(80, 35, 45, 0.25);
+            z-index: 1;
+        }
+        .env-body::after {
+            content: ""; position: absolute; inset: 0; opacity: 0.15;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="60" height="60"><path d="M20 50 Q35 20 50 30 T80 50" stroke="%23cfa35d" fill="none" stroke-width="0.8"/><path d="M15 50 Q25 15 50 25 T85 50" stroke="%23c97a8e" fill="none" stroke-width="0.6"/></svg>') repeat;
+        }
+        .env-flap {
+            position: absolute; top: 0; left: 0; right: 0; height: 56%;
+            background: linear-gradient(150deg, #fae9de, #e5c7b7);
+            clip-path: polygon(0 0, 100% 0, 50% 92%);
+            transform-origin: top center; z-index: 3;
+            transition: transform 0.8s cubic-bezier(0.6, -0.1, 0.4, 1.3);
+            box-shadow: 0 3px 10px rgba(80, 35, 45, 0.15);
+        }
+        .env-ribbon {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 44px;
+            background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-deep));
+            border-radius: 40px; z-index: 5;
+            box-shadow: 0 8px 18px rgba(160, 100, 40, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Great Vibes', cursive; font-size: 28px; color: #fff; letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .envelope.open .env-ribbon { opacity: 0; transform: translateX(-50%) scale(0.5); }
+        .env-seal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 55px; height: 55px;
+            background: radial-gradient(circle at 30% 28%, var(--gold-light), var(--gold));
+            border-radius: 50%; z-index: 4;
+            box-shadow: 0 5px 18px rgba(160, 100, 40, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Great Vibes', cursive; font-size: 24px; color: var(--crimson);
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        .envelope.open .env-seal { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+        .env-letter {
+            position: absolute; left: 8%; right: 8%; top: 18%; height: 66%;
+            background: #fffefb; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            transition: transform 0.9s cubic-bezier(0.22, 0.9, 0.3, 1.2); z-index: 2;
+        }
+        .env-letter .mono { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 32px; color: var(--pink-dark); }
+        .env-letter .sub { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--pink-dark); opacity: 0.8; }
+        .envelope.open .env-letter { transform: translateY(-58%) scale(1.06); }
+        .envelope.open .env-flap { transform: rotateX(185deg); }
+        .env-hint {
+            font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--pink-dark); opacity: 0.7; animation: hintPulse 2.4s infinite;
+        }
+        @keyframes hintPulse { 0%,100%{opacity:0.4;} 50%{opacity:0.85;} }
 
-  body.locked{ overflow:hidden; height:100svh; }
+        /* ================= PARTÍCULAS ================= */
+        .particles-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+        .petal, .sparkle { position: absolute; }
+        .petal { width: 12px; height: 16px; border-radius: 0 100% 0 100%; opacity: 0.55; animation: fall linear infinite, sway ease-in-out infinite; }
+        .petal.p1 { background: linear-gradient(150deg, #e7b8c5, #d49db3); }
+        .petal.p2 { background: linear-gradient(150deg, #f3dec5, #dbbc8c); }
+        .sparkle { font-size: 14px; opacity: 0; animation: sparkleFloat 4s infinite; }
+        @keyframes fall { 0%{transform:translateY(-5vh) rotate(0deg);} 100%{transform:translateY(105vh) rotate(360deg);} }
+        @keyframes sway { 0%,100%{margin-left:0;} 50%{margin-left:30px;} }
+        @keyframes sparkleFloat { 0%{opacity:0; transform:translateY(0) scale(0);} 20%{opacity:1;} 100%{opacity:0; transform:translateY(-120px) scale(1.2);} }
 
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
-  }
+        /* ================= SECCIONES CON TRANSICIONES CINEMATOGRÁFICAS ================= */
+        .section {
+            scroll-snap-align: start;
+            min-height: 100svh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 25px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .section.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-  /* ================= SOBRE / ENVELOPE INTRO ================= */
-  .envelope-screen{
-    position:fixed; inset:0;
-    z-index:100;
-    background:radial-gradient(circle at 50% 40%, #fff 0%, var(--cream) 70%);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:opacity 0.7s ease, visibility 0.7s ease;
-  }
-  .envelope-screen.hidden{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-  }
+        .hero-section { background: linear-gradient(180deg, #fdf6f2 0%, #fae7df 80%, #f4d8ce 100%); text-align: center; }
+        .hero-flower {
+            width: 160px; height: 160px; position: relative; margin-bottom: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M100 20 Q130 40 140 80 Q150 120 120 130 Q90 140 80 110 Q70 80 100 60 Q130 40 100 20" fill="%23c97a8e" opacity="0.8"/><path d="M100 180 Q70 160 60 120 Q50 80 80 70 Q110 60 120 90 Q130 120 100 140 Q70 160 100 180" fill="%23d49db3" opacity="0.8"/></svg>') no-repeat center/contain;
+        }
+        .title-hand { font-family: 'Great Vibes', cursive; font-size: 36px; color: var(--gold); line-height: 0.9; margin-bottom: 5px; }
+        .title-main {
+            font-family: 'Great Vibes', cursive; font-weight: 400; font-size: clamp(52px, 13vw, 90px);
+            color: var(--crimson); line-height: 1; margin: 10px 0 5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.06);
+        }
+        .subtitle { font-size: 18px; font-style: italic; color: var(--ink); opacity: 0.8; margin-bottom: 20px; }
+        .parents-block { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; max-width: 400px; }
+        .parent-item { text-align: center; }
+        .parent-label { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-deep); opacity: 0.9; margin-bottom: 3px; }
+        .parent-names { font-size: 15px; font-style: italic; color: #5a3a40; opacity: 0.9; line-height: 1.6; }
+        .date-badge {
+            display: inline-flex; align-items: center; gap: 15px; margin-top: 25px;
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(6px);
+            padding: 10px 24px; border-radius: 50px; font-family: 'Montserrat', sans-serif;
+            font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--crimson); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .countdown-box {
+            margin-top: 30px; background: #fff; border-radius: 80px; padding: 5px;
+            display: inline-flex; box-shadow: var(--shadow-lux);
+        }
+        .cd-item { padding: 12px 20px; text-align: center; position: relative; }
+        .cd-item:not(:last-child)::after { content:""; position:absolute; right:0; top:20%; height:60%; width:1px; background:#e0ccd4; }
+        .cd-num { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 28px; color: var(--crimson); line-height:1; }
+        .cd-num.flip { animation: flipNum 0.5s ease; }
+        @keyframes flipNum { 0%{transform:translateY(0);} 45%{transform:translateY(-8px);opacity:0.3;} 55%{transform:translateY(8px);opacity:0.3;} 100%{transform:translateY(0);opacity:1;} }
+        .cd-label { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--pink-dark); opacity:0.7; margin-top:5px; }
 
-  .envelope-hint{
-    position:absolute;
-    bottom:14%;
-    left:50%;
-    transform:translateX(-50%);
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.6;
-    animation:pulse 2.2s ease-in-out infinite;
-  }
-  @keyframes pulse{
-    0%,100%{ opacity:0.35; }
-    50%{ opacity:0.75; }
-  }
+        /* timeline */
+        .timeline-section { background: linear-gradient(180deg, #f4d8ce 0%, #f0e5db 40%, #f7f0e9 100%); }
+        .event-card { background: #fffefc; border-radius: var(--radius-xl); padding: 30px 25px; max-width: 380px; width: 100%; margin: 25px auto; box-shadow: var(--shadow-card); position: relative; border: 1px solid rgba(207, 163, 93, 0.3); }
+        .event-card::before { content:""; position:absolute; top:15px; left:-18px; width:14px; height:14px; border-radius:50%; background:var(--gold); border:3px solid #fff; box-shadow:0 0 0 2px var(--gold); }
+        .event-time { font-family:'Montserrat', sans-serif; font-size:11px; letter-spacing:2px; color:var(--gold-deep); text-transform:uppercase; }
+        .event-title { font-family:'Playfair Display', serif; font-weight:600; font-size:24px; color:var(--crimson); margin:5px 0; }
+        .event-loc { font-style:italic; color:var(--pink-dark); }
+        .map-embed { margin-top:15px; border-radius:18px; overflow:hidden; height:0; opacity:0; transition:height 0.5s ease, opacity 0.5s; }
+        .map-embed.expanded { height:140px; opacity:1; }
+        .map-embed iframe { width:100%; height:100%; border:0; }
+        .lux-btn {
+            display:inline-flex; align-items:center; gap:6px; margin-top:12px;
+            background:transparent; border:1.5px solid var(--gold); color:var(--gold-deep);
+            font-family:'Montserrat', sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+            padding:8px 18px; border-radius:50px; cursor:pointer; transition:0.3s;
+        }
+        .lux-btn:hover { background:var(--gold); color:#fff; }
 
-  .envelope{
-    position:relative;
-    width:min(78vw, 320px);
-    height:min(56vw, 220px);
-    cursor:pointer;
-    perspective:1000px;
-  }
+        /* RSVP */
+        .rsvp-section { background: #fdfaf7; }
+        .rsvp-card { background: #fff; border-radius: var(--radius-xl); padding: 45px 30px; max-width: 420px; width: 100%; box-shadow: var(--shadow-card); text-align: center; border: 1px solid rgba(207,163,93,0.25); position: relative; }
+        .rsvp-card::after { content:""; position:absolute; top:-2px; left:20px; right:20px; height:2px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .rsvp-deadline {
+            font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--pink-dark); opacity: 0.8; margin: 16px 0 0;
+            background: rgba(207, 163, 93, 0.1); padding: 8px 18px; border-radius: 50px; display: inline-block;
+        }
+        .modal-overlay { position:fixed; inset:0; background:rgba(40,15,20,0.6); backdrop-filter:blur(8px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:0.4s; }
+        .modal-overlay.active { opacity:1; visibility:visible; }
+        .modal-dialog { background:#fff; border-radius:28px; padding:35px 25px; max-width:400px; width:90%; box-shadow:0 40px 60px rgba(0,0,0,0.25); text-align:center; transform:translateY(30px); transition:0.4s cubic-bezier(0.22,0.9,0.3,1.1); }
+        .active .modal-dialog { transform:translateY(0); }
+        .floating-btn {
+            position:fixed; bottom:30px; right:30px; z-index:99;
+            background:linear-gradient(135deg, #c97a8e, #8c4357); color:#fff; border:none;
+            font-family:'Montserrat', sans-serif; font-weight:500; font-size:12px; letter-spacing:1px;
+            padding:14px 28px; border-radius:60px; box-shadow:0 10px 25px rgba(140,67,87,0.4);
+            cursor:pointer; transition:0.3s; display:flex; align-items:center; gap:8px;
+        }
+        .floating-btn:hover { transform:translateY(-4px); box-shadow:0 16px 32px rgba(140,67,87,0.5); }
+        .floating-btn.confirmed {
+            background: #5c2a37; cursor: default; opacity: 0.9;
+        }
+        .floating-btn.confirmed:hover { transform: none; box-shadow: 0 10px 25px rgba(140,67,87,0.4); }
+        .floating-btn.confirmed::before { content: "✓ "; font-size: 14px; }
 
-  .env-body{
-    position:absolute; inset:0;
-    background:linear-gradient(160deg, #fff, var(--blush));
-    border-radius:6px;
-    box-shadow:0 20px 44px rgba(154,63,102,0.22);
-    overflow:hidden;
-  }
-  .env-body::before{
-    content:"";
-    position:absolute; inset:0;
-    background:
-      linear-gradient(115deg, rgba(154,63,102,0.08) 0%, transparent 35%),
-      linear-gradient(245deg, rgba(154,63,102,0.08) 0%, transparent 35%);
-  }
-
-  .env-letter{
-    position:absolute;
-    left:8%; right:8%;
-    top:14%;
-    height:78%;
-    background:#fffdfb;
-    border-radius:4px;
-    box-shadow:0 6px 16px rgba(0,0,0,0.08);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    transition:transform 0.9s cubic-bezier(.22,.9,.3,1.2);
-    z-index:2;
-  }
-  .env-letter .l-mono{
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    font-size:24px;
-    color:var(--pink-deep);
-  }
-  .env-letter .l-text{
-    font-family:'Montserrat', sans-serif;
-    font-size:9px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.6;
-  }
-
-  .env-flap{
-    position:absolute;
-    top:0; left:0; right:0;
-    height:56%;
-    background:linear-gradient(160deg, var(--blush), var(--pink));
-    clip-path:polygon(0 0, 100% 0, 50% 92%);
-    transform-origin:top center;
-    transition:transform 0.8s cubic-bezier(.6,-0.1,.4,1.3);
-    z-index:3;
-    box-shadow:0 2px 8px rgba(154,63,102,0.15);
-  }
-
-  .env-seal{
-    position:absolute;
-    top:38%; left:50%;
-    transform:translate(-50%,-50%);
-    width:46px; height:46px;
-    background:radial-gradient(circle at 35% 30%, var(--pink), var(--pink-deep));
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    color:var(--gold-soft);
-    font-size:18px;
-    z-index:4;
-    box-shadow:0 4px 10px rgba(154,63,102,0.35);
-    transition:opacity 0.4s ease, transform 0.4s ease;
-  }
-
-  .envelope.open .env-flap{ transform:rotateX(180deg); }
-  .envelope.open .env-seal{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
-  .envelope.open .env-letter{ transform:translateY(-64%) scale(1.04); }
-
-  /* ================= PÉTALOS CAYENDO — ambiente ================= */
-  .petals-field{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:2;
-    overflow:hidden;
-  }
-  .falling-petal{
-    position:absolute;
-    top:-30px;
-    width:10px; height:13px;
-    background:linear-gradient(150deg, var(--pink-mid), var(--pink));
-    border-radius:0 100% 0 100%;
-    opacity:0.7;
-    animation-name:fall, sway;
-    animation-timing-function:linear, ease-in-out;
-    animation-iteration-count:infinite, infinite;
-  }
-  @keyframes fall{
-    from{ transform:translateY(-5vh) rotate(0deg); }
-    to{ transform:translateY(105vh) rotate(340deg); }
-  }
-  @keyframes sway{
-    0%,100%{ margin-left:0; }
-    50%{ margin-left:26px; }
-  }
-
-  /* ================= ROSA FLORECIENTE — elemento firma ================= */
-  .rose{
-    position:relative;
-    width:220px;
-    height:220px;
-    margin:0 auto;
-  }
-  .petal{
-    position:absolute;
-    top:50%; left:50%;
-    width:90px; height:120px;
-    background:linear-gradient(150deg, var(--pink-mid), var(--pink-deep));
-    border-radius:0 100% 0 100%;
-    transform-origin:0% 100%;
-    opacity:0;
-    animation:bloom 1.4s cubic-bezier(.2,.9,.3,1.2) forwards;
-  }
-  .petal:nth-child(1){ transform:translate(-50%,-100%) rotate(0deg) scale(0.2); animation-delay:0.1s; }
-  .petal:nth-child(2){ transform:translate(-50%,-100%) rotate(60deg) scale(0.2); animation-delay:0.22s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
-  .petal:nth-child(3){ transform:translate(-50%,-100%) rotate(120deg) scale(0.2); animation-delay:0.34s; }
-  .petal:nth-child(4){ transform:translate(-50%,-100%) rotate(180deg) scale(0.2); animation-delay:0.46s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
-  .petal:nth-child(5){ transform:translate(-50%,-100%) rotate(240deg) scale(0.2); animation-delay:0.58s; }
-  .petal:nth-child(6){ transform:translate(-50%,-100%) rotate(300deg) scale(0.2); animation-delay:0.7s; background:linear-gradient(150deg, var(--pink), var(--pink-mid)); }
-
-  @keyframes bloom{
-    0%{ opacity:0; }
-    40%{ opacity:0.95; }
-    100%{
-      opacity:0.95;
-    }
-  }
-  .petal:nth-child(1){ animation-name:bloom1; }
-  .petal:nth-child(2){ animation-name:bloom2; }
-  .petal:nth-child(3){ animation-name:bloom3; }
-  .petal:nth-child(4){ animation-name:bloom4; }
-  .petal:nth-child(5){ animation-name:bloom5; }
-  .petal:nth-child(6){ animation-name:bloom6; }
-  @keyframes bloom1{ from{opacity:0; transform:translate(-50%,-100%) rotate(0deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(0deg) scale(1);} }
-  @keyframes bloom2{ from{opacity:0; transform:translate(-50%,-100%) rotate(60deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(60deg) scale(1);} }
-  @keyframes bloom3{ from{opacity:0; transform:translate(-50%,-100%) rotate(120deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(120deg) scale(1);} }
-  @keyframes bloom4{ from{opacity:0; transform:translate(-50%,-100%) rotate(180deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(180deg) scale(1);} }
-  @keyframes bloom5{ from{opacity:0; transform:translate(-50%,-100%) rotate(240deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(240deg) scale(1);} }
-  @keyframes bloom6{ from{opacity:0; transform:translate(-50%,-100%) rotate(300deg) scale(0.15);} to{opacity:0.95; transform:translate(-50%,-100%) rotate(300deg) scale(1);} }
-
-  .rose-center{
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    width:38px; height:38px;
-    background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));
-    border-radius:50%;
-    z-index:5;
-    box-shadow:0 0 0 6px rgba(253,245,245,0.7);
-  }
-
-  /* ================= SCROLL REVEAL (genérico) ================= */
-  .reveal{
-    opacity:0;
-    transform:translateY(28px);
-    transition:opacity 0.8s ease, transform 0.8s ease;
-  }
-  .reveal.in-view{
-    opacity:1;
-    transform:translateY(0);
-  }
-  .reveal-left{ transform:translateX(-40px); }
-  .reveal-left.in-view{ transform:translateX(0); }
-  .reveal-right{ transform:translateX(40px); }
-  .reveal-right.in-view{ transform:translateX(0); }
-  .reveal-scale{ transform:scale(0.9); }
-  .reveal-scale.in-view{ transform:scale(1); }
-
-  /* ================= CASCADA DEL HERO ================= */
-  .cascade > *{
-    opacity:0;
-    transform:translateY(16px);
-    animation:cascadeIn 0.8s ease forwards;
-  }
-  @keyframes cascadeIn{
-    to{ opacity:1; transform:translateY(0); }
-  }
-  .cascade .eyebrow{ animation-delay:1.1s; }
-  .cascade .name{ animation-delay:1.25s; }
-  .cascade .subname{ animation-delay:1.55s; }
-  .cascade .padrinos{ animation-delay:1.75s; }
-  .cascade .date-tag{ animation-delay:1.95s; }
-
-  /* ================= HERO EDITORIAL ASIMÉTRICO ================= */
-  .hero{
-    min-height:100svh;
-    display:grid;
-    grid-template-columns:1fr;
-    align-items:center;
-    justify-items:center;
-    text-align:center;
-    padding:60px 24px 40px;
-    position:relative;
-  }
-
-  .eyebrow{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:6px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.75;
-    margin-top:26px;
-  }
-
-  .name{
-    font-family:'Fraunces', serif;
-    font-optical-sizing:auto;
-    font-weight:600;
-    font-style:normal;
-    font-size:clamp(44px, 11vw, 78px);
-    color:var(--pink-deep);
-    line-height:0.95;
-    margin:14px 0 6px;
-    letter-spacing:-1px;
-  }
-  .name em{
-    font-style:italic;
-    font-weight:500;
-    color:var(--pink);
-  }
-
-  .subname{
-    font-size:clamp(15px,4vw,19px);
-    font-style:italic;
-    color:var(--ink);
-    opacity:0.6;
-    margin-bottom:8px;
-  }
-
-  .padrinos{
-    font-size:14px;
-    font-style:italic;
-    color:var(--ink);
-    opacity:0.5;
-    max-width:300px;
-    margin:0 auto 8px;
-    line-height:1.5;
-  }
-
-  .date-tag{
-    margin-top:26px;
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    font-family:'Montserrat', sans-serif;
-    font-size:12px;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-  }
-  .date-tag .dot{
-    width:5px; height:5px;
-    border-radius:50%;
-    background:var(--gold);
-  }
-
-  /* ================= TALLO / LÍNEA DE TIEMPO ================= */
-  .stem-wrap{
-    max-width:640px;
-    margin:0 auto;
-    position:relative;
-    padding:0 24px;
-  }
-  .stem-line{
-    position:absolute;
-    left:50%;
-    top:0; bottom:0;
-    width:2px;
-    background:linear-gradient(180deg, transparent, var(--stem) 6%, var(--stem) 94%, transparent);
-    opacity:0.35;
-    transform:translateX(-50%);
-  }
-  .thorn{
-    position:absolute;
-    left:50%;
-    width:10px; height:10px;
-    background:var(--gold);
-    transform:translateX(-50%) rotate(45deg);
-    border-radius:2px;
-  }
-
-  /* ================= CUENTA REGRESIVA — capullo ================= */
-  .countdown-block{
-    text-align:center;
-    padding:90px 24px 70px;
-    position:relative;
-    z-index:1;
-  }
-  .countdown-title{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:4px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.7;
-    margin-bottom:30px;
-  }
-  .countdown{
-    display:inline-flex;
-    gap:0;
-    background:#fff;
-    border-radius:100px;
-    padding:6px;
-    box-shadow:0 14px 34px rgba(199,107,143,0.14);
-  }
-  .cd-unit{
-    padding:16px 20px;
-    text-align:center;
-    position:relative;
-  }
-  .cd-unit:not(:last-child)::after{
-    content:"";
-    position:absolute;
-    right:0; top:50%;
-    transform:translateY(-50%);
-    width:1px; height:24px;
-    background:var(--blush);
-  }
-  .cd-number{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:clamp(24px,6vw,30px);
-    color:var(--pink-deep);
-    line-height:1;
-    display:inline-block;
-  }
-  .cd-number.flip{
-    animation:numberFlip 0.4s ease;
-  }
-  @keyframes numberFlip{
-    0%{ transform:translateY(0); opacity:1; }
-    45%{ transform:translateY(-8px); opacity:0.3; }
-    55%{ transform:translateY(8px); opacity:0.3; }
-    100%{ transform:translateY(0); opacity:1; }
-  }
-  .cd-label{
-    font-family:'Montserrat', sans-serif;
-    font-size:8px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.55;
-    margin-top:6px;
-  }
-
-  /* ================= EVENTOS — bloques asimétricos alternados ================= */
-  .timeline{
-    position:relative;
-    max-width:640px;
-    margin:0 auto;
-    padding:20px 24px 90px;
-  }
-  .t-line{
-    position:absolute;
-    left:50%;
-    top:20px; bottom:90px;
-    width:2px;
-    background:var(--blush);
-    transform:translateX(-50%);
-  }
-  .t-item{
-    position:relative;
-    width:calc(50% - 34px);
-    margin-bottom:56px;
-  }
-  .t-item.right{ margin-left:calc(50% + 34px); }
-  .t-item.left{ margin-left:0; text-align:right; }
-
-  .t-node{
-    position:absolute;
-    top:6px;
-    width:14px; height:14px;
-    border-radius:50%;
-    background:var(--pink-deep);
-    border:3px solid var(--cream);
-    box-shadow:0 0 0 1px var(--pink-deep);
-  }
-  .t-item.in-view .t-node{
-    animation:nodePulse 0.6s ease;
-  }
-  @keyframes nodePulse{
-    0%{ box-shadow:0 0 0 1px var(--pink-deep); }
-    50%{ box-shadow:0 0 0 8px rgba(154,63,102,0.15); }
-    100%{ box-shadow:0 0 0 1px var(--pink-deep); }
-  }
-  .t-item.right .t-node{ left:-41px; }
-  .t-item.left .t-node{ right:-41px; }
-
-  .t-eyebrow{
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.6;
-    margin-bottom:6px;
-  }
-  .t-title{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:24px;
-    color:var(--ink);
-    margin-bottom:4px;
-  }
-  .t-time{
-    font-size:16px;
-    font-style:italic;
-    color:var(--pink-deep);
-  }
-  .t-note{
-    font-family:'Montserrat', sans-serif;
-    font-size:12px;
-    color:var(--ink);
-    opacity:0.5;
-    margin-top:6px;
-  }
-  .t-map{
-    display:inline-flex;
-    margin-top:12px;
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    border-bottom:1px solid var(--pink-deep);
-    text-decoration:none;
-    padding-bottom:2px;
-  }
-
-  .map-embed{
-    margin-top:14px;
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 8px 20px rgba(199,107,143,0.15);
-    height:150px;
-    opacity:0;
-    transition:opacity 0.7s ease 0.35s;
-  }
-  .t-item.in-view .map-embed{
-    opacity:1;
-  }
-  .map-embed iframe{
-    width:100%; height:100%;
-    border:0;
-    display:block;
-  }
-
-  @media (max-width:560px){
-    .t-line{ left:16px; }
-    .t-item, .t-item.right, .t-item.left{
-      width:calc(100% - 50px);
-      margin-left:50px;
-      text-align:left;
-    }
-    .t-item.right .t-node, .t-item.left .t-node{ left:-38px; right:auto; }
-  }
-
-  /* ================= SECCIÓN INFO (rsvp) ================= */
-  .info-section{
-    max-width:640px;
-    margin:0 auto;
-    padding:20px 24px 90px;
-    text-align:center;
-  }
-  .section-heading{
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    font-weight:500;
-    font-size:32px;
-    color:var(--pink-deep);
-    margin-bottom:6px;
-  }
-  .section-sub{
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:var(--ink);
-    opacity:0.45;
-    margin-bottom:34px;
-  }
-
-  .rsvp-card{
-    margin-top:20px;
-    background:#fff;
-    border-radius:20px;
-    padding:44px 30px;
-    box-shadow:0 14px 34px rgba(199,107,143,0.12);
-  }
-  .rsvp-text{
-    font-size:17px;
-    color:var(--ink);
-    opacity:0.7;
-    max-width:340px;
-    margin:0 auto 22px;
-    line-height:1.55;
-  }
-  .rsvp-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    background:linear-gradient(135deg, var(--pink), var(--pink-deep));
-    color:#fff;
-    font-family:'Montserrat', sans-serif;
-    font-size:12px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    padding:14px 30px;
-    border-radius:100px;
-    text-decoration:none;
-    box-shadow:0 10px 22px rgba(154,63,102,0.25);
-    transition:transform 0.2s ease;
-  }
-  .rsvp-btn:hover{ transform:translateY(-2px); }
-  .rsvp-deadline{
-    margin-top:16px;
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.5;
-  }
-
-  .rsvp-count-btn{
-    display:block;
-    margin:24px auto 0;
-    background:none;
-    border:1px solid var(--pink-deep);
-    color:var(--pink-deep);
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    padding:12px 26px;
-    border-radius:100px;
-    cursor:pointer;
-    transition:background 0.2s ease, color 0.2s ease;
-  }
-  .rsvp-count-btn:hover{ background:var(--pink-deep); color:#fff; }
-  .rsvp-count-btn.confirmed{
-    background:var(--pink-deep);
-    color:#fff;
-    cursor:default;
-  }
-
-  .rsvp-form{
-    margin-top:24px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    max-width:320px;
-    margin-left:auto;
-    margin-right:auto;
-  }
-  .rsvp-form.hidden{ display:none; }
-
-  .rsvp-input{
-    font-family:'Cormorant Garamond', serif;
-    font-size:16px;
-    color:var(--ink);
-    background:var(--cream);
-    border:1px solid var(--blush);
-    border-radius:10px;
-    padding:12px 16px;
-    outline:none;
-    transition:border-color 0.2s ease;
-  }
-  .rsvp-input:focus{ border-color:var(--pink-deep); }
-  .rsvp-input::placeholder{ color:var(--ink); opacity:0.4; }
-
-  .rsvp-checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    justify-content:center;
-    font-family:'Montserrat', sans-serif;
-    font-size:12px;
-    letter-spacing:0.5px;
-    color:var(--ink);
-    opacity:0.75;
-    cursor:pointer;
-  }
-  .rsvp-checkbox input{
-    width:16px; height:16px;
-    accent-color:var(--pink-deep);
-    cursor:pointer;
-  }
-
-  .rsvp-stepper{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-  }
-  .stepper-label{
-    font-family:'Montserrat', sans-serif;
-    font-size:12px;
-    letter-spacing:0.5px;
-    color:var(--ink);
-    opacity:0.7;
-  }
-  .stepper-controls{
-    display:flex;
-    align-items:center;
-    gap:22px;
-  }
-  .stepper-btn{
-    width:38px; height:38px;
-    border-radius:50%;
-    border:1px solid var(--pink-deep);
-    background:#fff;
-    color:var(--pink-deep);
-    font-size:18px;
-    line-height:1;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background 0.2s ease, color 0.2s ease;
-  }
-  .stepper-btn:hover:not(:disabled){ background:var(--pink-deep); color:#fff; }
-  .stepper-btn:disabled{ opacity:0.3; cursor:default; }
-  .stepper-value{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:26px;
-    color:var(--pink-deep);
-    min-width:24px;
-    text-align:center;
-  }
-  .stepper-max{
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:1px;
-    color:var(--ink);
-    opacity:0.4;
-  }
-
-  .rsvp-error{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    color:#b3435a;
-    min-height:14px;
-    margin-top:-4px;
-  }
-
-  .rsvp-counter{
-    margin-top:14px;
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1px;
-    color:var(--ink);
-    opacity:0.5;
-  }
-  .rsvp-counter span{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:16px;
-    color:var(--pink-deep);
-  }
-
-  .missing-notice{
-    margin-top:20px;
-    padding:18px;
-    background:var(--blush);
-    border-radius:14px;
-    text-align:center;
-  }
-  .missing-notice p{
-    font-size:14px;
-    color:var(--ink);
-    opacity:0.75;
-    margin-bottom:12px;
-    line-height:1.5;
-  }
-  .missing-notice span{
-    font-weight:600;
-    color:var(--pink-deep);
-  }
-  .missing-btn{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:#fff;
-    background:var(--pink-deep);
-    border:none;
-    padding:10px 20px;
-    border-radius:100px;
-    cursor:pointer;
-  }
-  .missing-btn:hover{ opacity:0.9; }
-
-  footer{
-    text-align:center;
-    padding:40px 24px 100px;
-  }
-
-  /* ================= PANEL DE ADMINISTRADOR ================= */
-  .admin-panel{
-    position:fixed;
-    inset:0;
-    z-index:200;
-    background:var(--cream);
-    overflow-y:auto;
-    padding:40px 24px 80px;
-  }
-  .admin-header{
-    text-align:center;
-    margin-bottom:34px;
-  }
-  .admin-title{
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    font-weight:600;
-    font-size:28px;
-    color:var(--pink-deep);
-  }
-  .admin-subtitle{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--ink);
-    opacity:0.5;
-    margin-top:6px;
-  }
-  .admin-total{
-    max-width:400px;
-    margin:0 auto 30px;
-    background:#fff;
-    border-radius:16px;
-    padding:26px;
-    text-align:center;
-    box-shadow:0 10px 26px rgba(199,107,143,0.12);
-  }
-  .admin-total-number{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:44px;
-    color:var(--pink-deep);
-    line-height:1;
-  }
-  .admin-total-label{
-    font-family:'Montserrat', sans-serif;
-    font-size:10px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    opacity:0.6;
-    margin-top:6px;
-  }
-  .admin-list{
-    max-width:400px;
-    margin:0 auto;
-    background:#fff;
-    border-radius:16px;
-    padding:10px 0;
-    box-shadow:0 10px 26px rgba(199,107,143,0.1);
-  }
-  .admin-list-item{
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-    padding:14px 22px;
-    border-bottom:1px solid var(--cream);
-    font-size:17px;
-    color:var(--ink);
-  }
-  .admin-list-item:last-child{ border-bottom:none; }
-  .admin-list-index{
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    color:var(--pink-deep);
-    opacity:0.5;
-    min-width:20px;
-  }
-  .admin-list-name{
-    flex:1;
-  }
-  .admin-qty{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    flex-shrink:0;
-  }
-  .admin-qty-btn{
-    width:22px; height:22px;
-    border-radius:50%;
-    border:1px solid var(--pink-deep);
-    background:#fff;
-    color:var(--pink-deep);
-    font-size:13px;
-    line-height:1;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background 0.2s ease, color 0.2s ease;
-  }
-  .admin-qty-btn:hover{ background:var(--pink-deep); color:#fff; }
-  .admin-qty-value{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:14px;
-    color:var(--pink-deep);
-    min-width:14px;
-    text-align:center;
-  }
-  .admin-list-delete{
-    background:none;
-    border:1px solid #e8b8c2;
-    color:#b3435a;
-    width:26px; height:26px;
-    border-radius:50%;
-    font-size:12px;
-    line-height:1;
-    cursor:pointer;
-    flex-shrink:0;
-    transition:background 0.2s ease, color 0.2s ease;
-  }
-  .admin-list-delete:hover{ background:#b3435a; color:#fff; }
-  .admin-fill{
-    font-family:'Montserrat', sans-serif;
-    font-size:9px;
-    letter-spacing:0.5px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    background:var(--cream);
-    border:1px solid var(--gold-soft);
-    padding:5px 10px;
-    border-radius:100px;
-    cursor:pointer;
-    flex-shrink:0;
-    white-space:nowrap;
-  }
-  .admin-fill:hover{ background:var(--gold-soft); }
-  .admin-empty{
-    text-align:center;
-    font-style:italic;
-    color:var(--ink);
-    opacity:0.5;
-    padding:20px;
-  }
-  .admin-refresh{
-    display:block;
-    margin:26px auto 0;
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--pink-deep);
-    background:#fff;
-    border:1px solid var(--gold-soft);
-    padding:10px 24px;
-    border-radius:100px;
-    cursor:pointer;
-  }
-  .admin-reset{
-    display:block;
-    margin:14px auto 0;
-    font-family:'Montserrat', sans-serif;
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:#b3435a;
-    background:#fff;
-    border:1px solid #e8b8c2;
-    padding:10px 24px;
-    border-radius:100px;
-    cursor:pointer;
-  }
-  .admin-reset:hover{ background:#b3435a; color:#fff; }
-  .footer-rose{
-    width:70px; height:70px;
-    margin:0 auto 24px;
-    transform:scale(0.32);
-  }
-  .footer-msg{
-    font-size:19px;
-    font-style:italic;
-    color:var(--pink-deep);
-    max-width:400px;
-    margin:0 auto 16px;
-    line-height:1.6;
-  }
-  .footer-name{
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    font-weight:500;
-    font-size:26px;
-    color:var(--pink-deep);
-  }
-</style>
+        /* footer */
+        .footer-section { background: #f2ddd0; text-align: center; }
+        .signature { font-family: 'Great Vibes', cursive; font-size: 42px; color: var(--crimson); line-height: 1.1; }
+    </style>
 </head>
 <body class="locked">
-
-<!-- ================= SOBRE ================= -->
 <div class="envelope-screen" id="envelopeScreen">
-  <div class="envelope" id="envelope">
-    <div class="env-letter">
-      <div class="l-mono">MF</div>
-      <div class="l-text">XV Años</div>
-    </div>
-    <div class="env-body"></div>
-    <div class="env-flap"></div>
-    <div class="env-seal">MF</div>
-  </div>
-  <p class="envelope-hint">Toca el sobre para abrir</p>
-</div>
-
-<div class="admin-panel" id="adminPanel" style="display:none;">
-  <div class="admin-header">
-    <p class="admin-title">Panel de confirmaciones</p>
-    <p class="admin-subtitle">Maria Fernanda · Mis XV años</p>
-  </div>
-
-  <div class="admin-total">
-    <div class="admin-total-number" id="adminTotal">0</div>
-    <div class="admin-total-label">Invitados confirmados</div>
-  </div>
-
-  <div class="admin-list" id="adminList"></div>
-
-  <button class="admin-refresh" id="adminRefresh">↻ Actualizar</button>
-  <button class="admin-reset" id="adminReset">🗑 Reiniciar contador</button>
-</div>
-
-<div class="petals-field" id="petalsField" aria-hidden="true"></div>
-
-<section class="hero cascade">
-  <div class="rose">
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="rose-center"></div>
-  </div>
-
-  <p class="eyebrow">Mis XV años</p>
-  <h1 class="name">Maria<br><em>Fernanda</em></h1>
-  <p class="subname">Te invito a celebrar conmigo</p>
-  <p class="padrinos">🔧 Con la bendición de mis padres Jesus Emmanuel Sandoval Rojas y Nereida Azucena Garcia Lopez</p>
-
-  <div class="date-tag">
-    <span class="dot"></span> 11 de julio de 2026 <span class="dot"></span>
-  </div>
-</section>
-
-<div class="countdown-block">
-  <p class="countdown-title reveal">Cuenta regresiva</p>
-  <div class="countdown reveal reveal-scale">
-    <div class="cd-unit"><div class="cd-number" id="cd-days">00</div><div class="cd-label">Días</div></div>
-    <div class="cd-unit"><div class="cd-number" id="cd-hours">00</div><div class="cd-label">Hrs</div></div>
-    <div class="cd-unit"><div class="cd-number" id="cd-minutes">00</div><div class="cd-label">Min</div></div>
-    <div class="cd-unit"><div class="cd-number" id="cd-seconds">00</div><div class="cd-label">Seg</div></div>
-  </div>
-</div>
-
-<div class="timeline">
-  <div class="t-line"></div>
-
-  <div class="t-item right reveal reveal-right">
-    <div class="t-node"></div>
-    <div class="t-eyebrow">5:00 p.m.</div>
-    <div class="t-title">Misa de Acción de Gracias</div>
-    <div class="t-time">Parroquia San Francisco de Asís</div>
-    <div class="map-embed">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.728046301514!2d-105.7795587245308!3d22.835044923299986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869ee2775831b849%3A0xe3b31e814663d30c!2sSan%20Francisco%20de%20As%C3%ADs!5e1!3m2!1ses-419!2smx!4v1782929659992!5m2!1ses-419!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    </div>
-    <a class="t-map" href="https://maps.app.goo.gl/CnafpG7UGFRgdzh59" target="_blank" rel="noopener">Abrir en Google Maps</a>
-  </div>
-
-  <div class="t-item left reveal reveal-left">
-    <div class="t-node"></div>
-    <div class="t-eyebrow">7:00 p.m.</div>
-    <div class="t-title">Recepción</div>
-    <div class="t-time">Salón "El Candela"</div>
-    <div class="t-note">Cena, baile y celebración</div>
-    <div class="map-embed">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d919.3128849886799!2d-105.78431873042473!3d22.83018143474821!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869f1d87148fa26b%3A0xaf8f67fff05c2426!2sRevoluci%C3%B3n%2088%2C%20Emiliano%20Zapata%2C%2082400%20Escuinapa%20de%20Hidalgo%2C%20Sin.!5e0!3m2!1ses-419!2smx!4v1782931024671!5m2!1ses-419!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    </div>
-    <a class="t-map" href="https://maps.app.goo.gl/vS232k6XZg5gLojj8" target="_blank" rel="noopener">Abrir en Google Maps</a>
-  </div>
-</div>
-
-<div class="info-section">
-  <div class="rsvp-card reveal">
-    <p class="rsvp-text">Tu presencia hará este día aún más especial. Por favor confirma antes de la fecha límite.</p>
-    <p class="rsvp-deadline">🔧 Confirma antes del [fecha límite]</p>
-
-    <div class="rsvp-form" id="rsvpForm">
-      <input type="text" class="rsvp-input" id="guestName" placeholder="Apellido de familia (ej. García López)" maxlength="60">
-
-      <div class="rsvp-stepper">
-        <span class="stepper-label">¿Cuántos van a asistir?</span>
-        <div class="stepper-controls">
-          <button type="button" class="stepper-btn" id="stepperMinus">−</button>
-          <span class="stepper-value" id="stepperValue">1</span>
-          <button type="button" class="stepper-btn" id="stepperPlus">+</button>
+    <div class="envelope" id="envelope">
+        <div class="env-body"></div>
+        <div class="env-flap"></div>
+        <div class="env-ribbon">Maria Fernanda</div>
+        <div class="env-seal">M</div>
+        <div class="env-letter">
+            <span class="mono">MF</span>
+            <span class="sub">XV Años</span>
         </div>
-        <span class="stepper-max">Máximo 5 personas por invitación</span>
-      </div>
-
-      <button class="rsvp-count-btn" id="confirmCountBtn">💬 Confirmar y enviar por WhatsApp</button>
-      <p class="rsvp-error" id="rsvpError"></p>
     </div>
+    <p class="env-hint">Toca para abrir</p>
+</div>
+<div class="particles-container" id="particles"></div>
 
-    <p class="rsvp-counter">
-      <span id="rsvpCount">—</span> invitados ya confirmaron
-    </p>
+<div id="adminPanel" style="display:none;position:fixed;inset:0;z-index:300;background:#fdfaf7;overflow-y:auto;padding:30px;"></div>
 
-    <div class="missing-notice" id="missingNotice" style="display:none;">
-      <p>Tu confirmación cambió: ahora aparecen <span id="missingCurrent"></span> de las <span id="missingOriginal"></span> personas que confirmaste (límite 5).</p>
-      <button class="missing-btn" id="addMissingBtn">+ Agregar las <span id="missingCount"></span> que faltan</button>
+<!-- contenido -->
+<div class="section hero-section" id="heroSection">
+    <div class="hero-flower"></div>
+    <div class="title-hand">con la bendición de Dios</div>
+    <h1 class="title-main">Maria Fernanda</h1>
+    <p class="subtitle">Mis XV Años</p>
+    <div class="parents-block">
+        <div class="parent-item">
+            <div class="parent-label">Padres</div>
+            <div class="parent-names">Jesus Emmanuel Sandoval Rojas<br>Nereida Azucena Garcia Lopez</div>
+        </div>
+        <div class="parent-item">
+            <div class="parent-label">Padrinos</div>
+            <div class="parent-names">Isaac Rene Carvajal Ramos<br>Carmen Verenice Ruiz Hernández</div>
+        </div>
     </div>
-  </div>
+    <div class="date-badge"><span>✦</span> 11 Julio 2026 <span>✦</span></div>
+    <div class="countdown-box" id="countdownBox">
+        <div class="cd-item"><div class="cd-num" id="cd-days">00</div><div class="cd-label">Días</div></div>
+        <div class="cd-item"><div class="cd-num" id="cd-hours">00</div><div class="cd-label">Hrs</div></div>
+        <div class="cd-item"><div class="cd-num" id="cd-minutes">00</div><div class="cd-label">Min</div></div>
+        <div class="cd-item"><div class="cd-num" id="cd-seconds">00</div><div class="cd-label">Seg</div></div>
+    </div>
 </div>
 
-<footer>
-  <div class="footer-rose rose">
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="rose-center"></div>
-  </div>
-  <p class="footer-msg">"Con la bendición de Dios y de mis padres, quiero compartir contigo este día tan especial."</p>
-  <p class="footer-name">Maria Fernanda</p>
+<div class="section timeline-section" id="timelineSection">
+    <div class="event-card">
+        <div class="event-time">5:00 PM</div>
+        <div class="event-title">Misa de Acción de Gracias</div>
+        <div class="event-loc">Parroquia San Francisco de Asís</div>
+        <div class="map-embed" id="mapMisa"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.728046301514!2d-105.7795587245308!3d22.835044923299986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869ee2775831b849%3A0xe3b31e814663d30c!2sSan%20Francisco%20de%20As%C3%ADs!5e1!3m2!1ses-419!2smx!4v1782929659992!5m2!1ses-419!2smx"></iframe></div>
+        <button class="lux-btn" onclick="expandMap('mapMisa')">🗺 Cómo llegar</button>
+    </div>
+    <div class="event-card">
+        <div class="event-time">7:00 PM</div>
+        <div class="event-title">Recepción</div>
+        <div class="event-loc">Salón "El Candela"</div>
+        <div class="map-embed" id="mapRecepcion"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d919.3128849886799!2d-105.78431873042473!3d22.83018143474821!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x869f1d87148fa26b%3A0xaf8f67fff05c2426!2sRevoluci%C3%B3n%2088%2C%20Emiliano%20Zapata%2C%2082400%20Escuinapa%20de%20Hidalgo%2C%20Sin.!5e0!3m2!1ses-419!2smx!4v1782931024671!5m2!1ses-419!2smx"></iframe></div>
+        <button class="lux-btn" onclick="expandMap('mapRecepcion')">🗺 Cómo llegar</button>
+    </div>
+</div>
+
+<div class="section rsvp-section" id="rsvpSection">
+    <div class="rsvp-card">
+        <h2 style="font-family:'Playfair Display',serif;font-weight:600;color:var(--crimson);">Confirma tu asistencia</h2>
+        <p style="font-style:italic;opacity:0.7;margin:12px 0;">Tu presencia hará este día inolvidable</p>
+        <p class="rsvp-deadline">🗓 Confirma antes del 10 de julio de 2026</p>
+        <div style="margin:20px 0;font-family:'Montserrat',sans-serif;font-size:13px;color:var(--ink);opacity:0.7;">
+            <span id="rsvpCount">0</span> invitados confirmados
+        </div>
+        <button class="lux-btn" id="openModalBtn" style="padding:12px 28px;">💬 Confirmar</button>
+    </div>
+</div>
+
+<footer class="section footer-section" id="footerSection">
+    <div class="signature">Maria Fernanda</div>
+    <p style="font-style:italic;max-width:340px;margin:20px auto;opacity:0.7;">"Con la bendición de Dios y de mis padres, quiero compartir contigo este día tan especial."</p>
 </footer>
 
+<button class="floating-btn" id="floatingBtn">💌 Confirmar</button>
+
+<div class="modal-overlay" id="rsvpModal">
+    <div class="modal-dialog">
+        <span style="position:absolute;top:10px;right:15px;cursor:pointer;font-size:24px;color:var(--pink-dark);" id="closeModal">&times;</span>
+        <h3 style="font-family:'Playfair Display',serif;color:var(--crimson);">Confirma tu asistencia</h3>
+        <p style="font-size:13px;color:#5a3a40;opacity:0.7;margin-bottom:12px;">Fecha límite: 15 de junio de 2026</p>
+        <input type="text" class="modal-input" id="guestName" placeholder="Apellido de familia" style="width:100%;padding:12px;margin:15px 0;border:1px solid #e0ccd4;border-radius:12px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:10px 0;">
+            <button id="minusBtn" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--gold);background:#fff;font-size:18px;">−</button>
+            <span id="guestQty" style="font-size:24px;font-family:'Playfair Display';">1</span>
+            <button id="plusBtn" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--gold);background:#fff;font-size:18px;">+</button>
+        </div>
+        <button id="submitRsvp" style="width:100%;padding:14px;background:linear-gradient(135deg,#c97a8e,#8c4357);color:#fff;border:none;border-radius:30px;font-family:'Montserrat',sans-serif;letter-spacing:1px;margin-top:15px;">Enviar por WhatsApp</button>
+        <p id="modalError" style="color:#b3435a;font-size:12px;min-height:18px;"></p>
+    </div>
+</div>
+
 <script>
-  // Evita que el navegador restaure una posición de scroll anterior
-  if('scrollRestoration' in history){ history.scrollRestoration = 'manual'; }
-  window.scrollTo(0, 0);
-
-  // ---------- Panel de administrador (acceso secreto) ----------
-  const ADMIN_SECRET = 'mf2026'; // 🔧 cámbialo por una palabra secreta solo tuya
-
-  // ---------- Conexión a Supabase (PostgreSQL) ----------
-  const SUPABASE_URL = 'https://cfabxxomemetafynaihs.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmYWJ4eG9tZW1ldGFmeW5haWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5Mzc1MDAsImV4cCI6MjA5ODUxMzUwMH0.7Utm_EwgkjgZgXq-TWeqisbVEkXP035EBnWLARi6yV8';
-  const SUPABASE_HEADERS = {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-    'Content-Type': 'application/json'
-  };
-
-  const params = new URLSearchParams(window.location.search);
-  const isAdmin = params.get('admin') === ADMIN_SECRET;
-
-  if(isAdmin){
-    document.body.classList.remove('locked');
-    document.getElementById('envelopeScreen').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    initAdminPanel();
-  }
-
-  async function getAdminData(){
-    try{
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?select=id,nombre,personas,personas_original&order=creado_en.asc`,
-        { headers: SUPABASE_HEADERS }
-      );
-      const rows = await res.json();
-      const count = rows.reduce((sum, row) => sum + row.personas, 0);
-      return { count, rows };
-    }catch(err){
-      return { count: 0, rows: [] };
-    }
-  }
-
-  async function initAdminPanel(){
-    const MAX_GUESTS_ADMIN = 5;
-    const adminTotal = document.getElementById('adminTotal');
-    const adminList = document.getElementById('adminList');
-    const adminRefresh = document.getElementById('adminRefresh');
-    const adminReset = document.getElementById('adminReset');
-
-    async function render(){
-      const data = await getAdminData();
-      adminTotal.textContent = data.count;
-
-      if(data.rows.length === 0){
-        adminList.innerHTML = '<p class="admin-empty">Aún no hay confirmaciones</p>';
-        return;
-      }
-
-      adminList.innerHTML = data.rows.map((row, i) => {
-        const original = row.personas_original || row.personas;
-        const showRestore = row.personas < original;
-        return `<div class="admin-list-item">
-          <span class="admin-list-index">${i+1}</span>
-          <span class="admin-list-name">${row.nombre}</span>
-          <div class="admin-qty">
-            <button class="admin-qty-btn" data-action="minus" data-id="${row.id}" data-qty="${row.personas}">−</button>
-            <span class="admin-qty-value">${row.personas}</span>
-            <button class="admin-qty-btn" data-action="plus" data-id="${row.id}" data-qty="${row.personas}">+</button>
-          </div>
-          ${showRestore ? `<button class="admin-fill" data-id="${row.id}" data-qty="${row.personas}" data-restore="${original}">Completar a ${original} (faltan ${original - row.personas})</button>` : ''}
-          <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
-        </div>`;
-      }).join('');
-
-      adminList.querySelectorAll('.admin-list-delete').forEach(btn=>{
-        btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
-      });
-
-      adminList.querySelectorAll('.admin-qty-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const id = btn.dataset.id;
-          const currentQty = parseInt(btn.dataset.qty, 10);
-          const newQty = btn.dataset.action === 'minus' ? currentQty - 1 : currentQty + 1;
-          adjustQuantity(id, currentQty, newQty);
+    (function() {
+        const env = document.getElementById('envelope');
+        const envScreen = document.getElementById('envelopeScreen');
+        const body = document.body;
+        env.addEventListener('click', ()=>{
+            if(env.classList.contains('open')) return;
+            env.classList.add('open');
+            setTimeout(()=>{ envScreen.classList.add('hidden'); body.classList.remove('locked'); }, 900);
         });
-      });
 
-      adminList.querySelectorAll('.admin-fill').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const id = btn.dataset.id;
-          const currentQty = parseInt(btn.dataset.qty, 10);
-          const restoreQty = parseInt(btn.dataset.restore, 10);
-          adjustQuantity(id, currentQty, restoreQty);
+        const particles = document.getElementById('particles');
+        for(let i=0;i<25;i++){
+            let el = document.createElement('div');
+            el.className = i%3===0 ? 'petal p1' : (i%3===1 ? 'petal p2' : 'sparkle');
+            if(el.className.includes('sparkle')) el.textContent = '✨';
+            el.style.left = Math.random()*100+'%';
+            el.style.animationDelay = Math.random()*8+'s';
+            el.style.animationDuration = (8+Math.random()*12)+'s, '+(3+Math.random()*4)+'s';
+            particles.appendChild(el);
+        }
+
+        // ================= TRANSICIONES CINEMATOGRÁFICAS =================
+        const sections = document.querySelectorAll('.section');
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    // Opcional: no dejar de observar para que la animación se repita si se vuelve a entrar
+                    // sectionObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.25 });
+
+        sections.forEach(section => {
+            sectionObserver.observe(section);
         });
-      });
-    }
 
-    async function adjustQuantity(id, currentQty, newQty){
-      if(newQty <= 0){
-        deleteEntry(id);
-        return;
-      }
-      if(newQty > 5){
-        alert('El máximo por invitación es 5 personas.');
-        return;
-      }
-      try{
-        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ personas: newQty })
+        // Revelar la primera sección inmediatamente si ya está visible (por si acaso)
+        window.addEventListener('load', () => {
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    section.classList.add('revealed');
+                }
+            });
         });
-      }catch(err){ /* ignore */ }
 
-      render();
-    }
+        const target = new Date('2026-07-11T17:00:00');
+        setInterval(()=>{
+            let diff = target - new Date();
+            if(diff<=0) return;
+            let d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+            ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach((id,i)=>{
+                let el = document.getElementById(id), val = [d,h,m,s][i].toString().padStart(2,'0');
+                if(el.textContent!==val){ el.textContent=val; el.classList.add('flip'); setTimeout(()=>el.classList.remove('flip'),400); }
+            });
+        },1000);
 
-    async function deleteEntry(id){
-      const confirmDelete = window.confirm('¿Borrar solo esta confirmación?');
-      if(!confirmDelete) return;
+        window.expandMap = (id) => {
+            let el = document.getElementById(id);
+            el.classList.toggle('expanded');
+        };
 
-      try{
-        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${id}`, {
-          method: 'DELETE',
-          headers: SUPABASE_HEADERS
+        // ================= RSVP CON INDICADOR VISUAL =================
+        let qty = 1;
+        const modal = document.getElementById('rsvpModal');
+        const floatingBtn = document.getElementById('floatingBtn');
+        const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
+
+        // Verificar si ya confirmó
+        function checkConfirmedStatus() {
+            if (localStorage.getItem(CONFIRMED_KEY) === 'true') {
+                floatingBtn.classList.add('confirmed');
+                floatingBtn.textContent = 'Asistencia confirmada';
+                document.getElementById('openModalBtn').textContent = '✓ Ya confirmaste';
+                document.getElementById('openModalBtn').style.pointerEvents = 'none';
+                document.getElementById('openModalBtn').style.opacity = '0.7';
+            }
+        }
+        checkConfirmedStatus();
+
+        document.getElementById('openModalBtn').addEventListener('click',()=>modal.classList.add('active'));
+        floatingBtn.addEventListener('click',()=>{
+            if (localStorage.getItem(CONFIRMED_KEY) === 'true') return; // no abre si ya confirmó
+            modal.classList.add('active');
         });
-      }catch(err){ /* ignore */ }
+        document.getElementById('closeModal').addEventListener('click',()=>modal.classList.remove('active'));
+        document.getElementById('minusBtn').addEventListener('click',()=>{ if(qty>1) qty--; document.getElementById('guestQty').textContent=qty; });
+        document.getElementById('plusBtn').addEventListener('click',()=>{ if(qty<5) qty++; document.getElementById('guestQty').textContent=qty; });
 
-      render();
-    }
+        const SUPABASE_URL = 'https://cfabxxomemetafynaihs.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmYWJ4eG9tZW1ldGFmeW5haWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5Mzc1MDAsImV4cCI6MjA5ODUxMzUwMH0.7Utm_EwgkjgZgXq-TWeqisbVEkXP035EBnWLARi6yV8';
+        const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
+        async function fetchCount() {
+            let res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?select=personas`,{headers});
+            let rows = await res.json();
+            return rows.reduce((s,r)=>s+r.personas,0);
+        }
+        async function updateCounter() {
+            let count = await fetchCount();
+            document.getElementById('rsvpCount').textContent = count;
+        }
+        updateCounter();
+        document.getElementById('submitRsvp').addEventListener('click', async ()=>{
+            let name = document.getElementById('guestName').value.trim() || 'Invitado';
+            let label = qty>1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
+            await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`,{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({nombre:label,personas:qty})});
+            updateCounter();
+            let count = await fetchCount();
 
-    async function resetCounter(){
-      const confirmReset = window.confirm('¿Seguro que quieres reiniciar el contador? Esto borra todas las confirmaciones registradas hasta ahora y no se puede deshacer.');
-      if(!confirmReset) return;
+            // Guardar estado de confirmación
+            localStorage.setItem(CONFIRMED_KEY, 'true');
+            checkConfirmedStatus();
 
-      try{
-        await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=gt.0`, {
-          method: 'DELETE',
-          headers: SUPABASE_HEADERS
+            window.open(`https://wa.me/526951093237?text=${encodeURIComponent('Confirmo asistencia a XV de Maria Fernanda: '+label+'. Total confirmados: '+count)}`,'_blank');
+            modal.classList.remove('active');
         });
-      }catch(err){ /* ignore */ }
-
-      localStorage.removeItem('xv-maria-fernanda-confirmed');
-      render();
-    }
-
-    adminRefresh.addEventListener('click', render);
-    adminReset.addEventListener('click', resetCounter);
-    render();
-
-    // Se actualiza solo cada 5 segundos, sin necesidad de tocar nada
-    setInterval(render, 5000);
-  }
-
-  // ---------- Apertura del sobre ----------
-  const envelope = document.getElementById('envelope');
-  const envelopeScreen = document.getElementById('envelopeScreen');
-  const body = document.body;
-
-  function openEnvelope(){
-    if(envelope.classList.contains('open')) return;
-    envelope.classList.add('open');
-    if(navigator.vibrate) navigator.vibrate(15);
-    window.scrollTo(0, 0);
-    setTimeout(()=>{
-      envelopeScreen.classList.add('hidden');
-      body.classList.remove('locked');
-      window.scrollTo(0, 0);
-    }, 900);
-  }
-
-  envelope.addEventListener('click', openEnvelope);
-  envelope.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEnvelope(); }
-  });
-  envelope.setAttribute('tabindex','0');
-  envelope.setAttribute('role','button');
-  envelope.setAttribute('aria-label','Abrir invitación');
-
-  // ---------- Pétalos cayendo (ambiente) ----------
-  const petalsField = document.getElementById('petalsField');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if(!prefersReducedMotion){
-    const PETAL_COUNT = 14;
-    for(let i=0; i<PETAL_COUNT; i++){
-      const petal = document.createElement('div');
-      petal.className = 'falling-petal';
-      const left = Math.random()*100;
-      const fallDuration = 9 + Math.random()*8;
-      const swayDuration = 3 + Math.random()*2;
-      const delay = Math.random()*12;
-      const size = 8 + Math.random()*6;
-      petal.style.left = left+'vw';
-      petal.style.width = size+'px';
-      petal.style.height = (size*1.3)+'px';
-      petal.style.animationDuration = fallDuration+'s, '+swayDuration+'s';
-      petal.style.animationDelay = (-delay)+'s, '+(-delay)+'s';
-      petalsField.appendChild(petal);
-    }
-  }
-
-  // ---------- Scroll reveal ----------
-  const revealEls = document.querySelectorAll('.reveal, .t-item');
-  const revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add('in-view');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-  revealEls.forEach(el => revealObserver.observe(el));
-
-  // ---------- Cuenta regresiva ----------
-  const targetDate = new Date('2026-07-11T17:00:00');
-
-  function updateCountdown(){
-    const now = new Date();
-    let diff = targetDate - now;
-
-    if(diff <= 0){
-      ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(id=>{
-        setCountdownValue(id, '00');
-      });
-      return;
-    }
-
-    const days = Math.floor(diff / (1000*60*60*24));
-    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-    const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
-    const seconds = Math.floor((diff % (1000*60)) / 1000);
-
-    setCountdownValue('cd-days', String(days).padStart(2,'0'));
-    setCountdownValue('cd-hours', String(hours).padStart(2,'0'));
-    setCountdownValue('cd-minutes', String(minutes).padStart(2,'0'));
-    setCountdownValue('cd-seconds', String(seconds).padStart(2,'0'));
-  }
-
-  function setCountdownValue(id, value){
-    const el = document.getElementById(id);
-    if(el.textContent !== value){
-      el.textContent = value;
-      el.classList.remove('flip');
-      void el.offsetWidth; // reinicia la animación
-      el.classList.add('flip');
-    }
-  }
-
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-
-  // ---------- Contador de confirmados ----------
-  const confirmBtn = document.getElementById('confirmCountBtn');
-  const rsvpCountEl = document.getElementById('rsvpCount');
-  const rsvpForm = document.getElementById('rsvpForm');
-  const guestNameInput = document.getElementById('guestName');
-  function toTitleCase(str){
-    return str.replace(/\S+/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-  }
-  guestNameInput.addEventListener('input', ()=>{
-    const cursorPos = guestNameInput.selectionStart;
-    guestNameInput.value = toTitleCase(guestNameInput.value);
-    guestNameInput.setSelectionRange(cursorPos, cursorPos);
-  });
-  const rsvpError = document.getElementById('rsvpError');
-
-  const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
-  const CONFIRMED_ID_KEY = 'xv-maria-fernanda-confirmed-id';
-  const WHATSAPP_NUMBER = '526951093237'; // 🔧 reemplaza con el número real, formato: 52 + LADA + número
-
-  // ---------- Stepper de cantidad de invitados ----------
-  const MAX_GUESTS = 5;
-  let guestQty = 1;
-  const stepperValue = document.getElementById('stepperValue');
-  const stepperMinus = document.getElementById('stepperMinus');
-  const stepperPlus = document.getElementById('stepperPlus');
-
-  function renderStepper(){
-    stepperValue.textContent = guestQty;
-    stepperMinus.disabled = guestQty <= 1;
-    stepperPlus.disabled = guestQty >= MAX_GUESTS;
-  }
-  stepperMinus.addEventListener('click', ()=>{
-    if(guestQty > 1){ guestQty--; renderStepper(); }
-  });
-  stepperPlus.addEventListener('click', ()=>{
-    if(guestQty < MAX_GUESTS){ guestQty++; renderStepper(); }
-  });
-  renderStepper();
-
-  // ---------- Lectura y escritura en Supabase (PostgreSQL real) ----------
-  async function fetchConfirmations(){
-    try{
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?select=nombre,personas&order=creado_en.asc`,
-        { headers: SUPABASE_HEADERS }
-      );
-      const rows = await res.json();
-      const count = rows.reduce((sum, row) => sum + row.personas, 0);
-      const names = rows.map(row => row.nombre);
-      return { count, names };
-    }catch(err){
-      return { count: 0, names: [] };
-    }
-  }
-
-  async function insertConfirmation(nombre, personas){
-    try{
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`, {
-        method: 'POST',
-        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=representation' },
-        body: JSON.stringify({ nombre, personas, personas_original: personas })
-      });
-      const rows = await res.json();
-      return rows && rows[0] ? rows[0].id : null;
-    }catch(err){
-      return null;
-    }
-  }
-
-  async function initCounter(){
-    const data = await fetchConfirmations();
-    rsvpCountEl.textContent = data.count;
-
-    if(localStorage.getItem(CONFIRMED_KEY) === 'true'){
-      showConfirmedState();
-      await checkMyOwnRow();
-    }
-
-    // Revisa el contador cada 5 segundos: mantiene el número al día,
-    // y si detecta que todo se reinició (total en 0), desbloquea
-    // el formulario automáticamente sin que el invitado haga nada.
-    setInterval(async ()=>{
-      const latest = await fetchConfirmations();
-      rsvpCountEl.textContent = latest.count;
-
-      if(latest.count === 0 && localStorage.getItem(CONFIRMED_KEY) === 'true'){
-        localStorage.removeItem(CONFIRMED_KEY);
-        localStorage.removeItem(CONFIRMED_ID_KEY);
-        rsvpForm.classList.remove('hidden');
-        confirmBtn.textContent = '💬 Confirmar y enviar por WhatsApp';
-        confirmBtn.classList.remove('confirmed');
-        guestNameInput.value = '';
-        guestQty = 1;
-        renderStepper();
-        missingNotice.style.display = 'none';
-        return;
-      }
-
-      await checkMyOwnRow();
-    }, 5000);
-  }
-
-  // ---------- Detecta si el admin redujo la cantidad de este invitado ----------
-  const missingNotice = document.getElementById('missingNotice');
-  const missingCurrent = document.getElementById('missingCurrent');
-  const missingOriginal = document.getElementById('missingOriginal');
-  const missingCount = document.getElementById('missingCount');
-  const addMissingBtn = document.getElementById('addMissingBtn');
-
-  async function checkMyOwnRow(){
-    const myId = localStorage.getItem(CONFIRMED_ID_KEY);
-    if(!myId) return;
-
-    try{
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${myId}&select=personas,personas_original`,
-        { headers: SUPABASE_HEADERS }
-      );
-      const rows = await res.json();
-
-      if(rows.length === 0){
-        // El admin borró la confirmación por completo
-        missingNotice.style.display = 'none';
-        return;
-      }
-
-      const currentQty = rows[0].personas;
-      const originalQty = rows[0].personas_original || currentQty;
-
-      if(currentQty < originalQty){
-        missingCurrent.textContent = currentQty;
-        missingOriginal.textContent = originalQty;
-        missingCount.textContent = originalQty - currentQty;
-        missingNotice.style.display = 'block';
-      } else {
-        missingNotice.style.display = 'none';
-      }
-    }catch(err){ /* ignore */ }
-  }
-
-  addMissingBtn.addEventListener('click', async ()=>{
-    const myId = localStorage.getItem(CONFIRMED_ID_KEY);
-    if(!myId) return;
-
-    try{
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${myId}&select=personas_original`,
-        { headers: SUPABASE_HEADERS }
-      );
-      const rows = await res.json();
-      const originalQty = rows && rows[0] ? rows[0].personas_original : null;
-      if(!originalQty) return;
-
-      await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${myId}`, {
-        method: 'PATCH',
-        headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ personas: originalQty })
-      });
-    }catch(err){ /* ignore */ }
-
-    missingNotice.style.display = 'none';
-    const latest = await fetchConfirmations();
-    rsvpCountEl.textContent = latest.count;
-  });
-
-  function showConfirmedState(){
-    rsvpForm.classList.add('hidden');
-    confirmBtn.textContent = '✓ Ya confirmaste';
-    confirmBtn.classList.add('confirmed');
-  }
-
-  confirmBtn.addEventListener('click', async ()=>{
-    rsvpError.textContent = '';
-
-    const typedName = guestNameInput.value.trim();
-    const guestLabel = typedName ? `Fam. ${typedName}` : 'Invitado sin nombre';
-    const displayLabel = guestQty > 1 ? `${guestLabel} (${guestQty} personas)` : guestLabel;
-
-    const before = await fetchConfirmations();
-
-    const insertedId = await insertConfirmation(displayLabel, guestQty);
-    if(insertedId){
-      localStorage.setItem(CONFIRMED_ID_KEY, insertedId);
-    }
-
-    const after = await fetchConfirmations();
-
-    animateCountUp(before.count, after.count);
-    localStorage.setItem(CONFIRMED_KEY, 'true');
-    showConfirmedState();
-
-    // ---------- Construir y abrir mensaje de WhatsApp ----------
-    let message = `¡Hola! Confirmo mi asistencia a los XV años de Maria Fernanda 🌸\n\n`;
-    message += `${typedName ? guestLabel + '\n' : ''}`;
-    message += `Número de personas: ${guestQty}\n`;
-    message += `\nHasta ahora somos ${after.count} invitados confirmados:\n`;
-    message += after.names.map(n => `• ${n}`).join('\n');
-
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, '_blank', 'noopener');
-  });
-
-  function animateCountUp(from, to){
-    const duration = 500;
-    const start = performance.now();
-    function step(now){
-      const progress = Math.min((now - start) / duration, 1);
-      const value = Math.round(from + (to - from) * progress);
-      rsvpCountEl.textContent = value;
-      if(progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-
-  initCounter();
+    })();
 </script>
-
 </body>
 </html>
