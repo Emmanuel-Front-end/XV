@@ -199,11 +199,6 @@
             cursor:pointer; transition:0.3s; display:flex; align-items:center; gap:8px;
         }
         .floating-btn:hover { transform:translateY(-4px); box-shadow:0 16px 32px rgba(140,67,87,0.5); }
-        .floating-btn.confirmed {
-            background: #5c2a37; cursor: default; opacity: 0.9;
-        }
-        .floating-btn.confirmed:hover { transform: none; box-shadow: 0 10px 25px rgba(140,67,87,0.4); }
-        .floating-btn.confirmed::before { content: "✓ "; font-size: 14px; }
 
         /* footer */
         .footer-section { background: #f2ddd0; text-align: center; }
@@ -323,9 +318,6 @@
         <h2 style="font-family:'Playfair Display',serif;font-weight:600;color:var(--crimson);">Confirma tu asistencia</h2>
         <p style="font-style:italic;opacity:0.7;margin:12px 0;">Tu presencia hará este día inolvidable</p>
         <p class="rsvp-deadline">🗓 Confirma antes del 10 de julio de 2026</p>
-        <div style="margin:20px 0;font-family:'Montserrat',sans-serif;font-size:13px;color:var(--ink);opacity:0.7;">
-            <span id="rsvpCount">0</span> invitados confirmados
-        </div>
         <button class="lux-btn" id="openModalBtn" style="padding:12px 28px;">💬 Confirmar</button>
     </div>
 </div>
@@ -355,7 +347,7 @@
 
 <script>
     (function() {
-        const ADMIN_SECRET = 'Emmanuel&Nereida2026';
+        const ADMIN_SECRET = 'mf2026';
         const params = new URLSearchParams(window.location.search);
         const isAdmin = params.get('admin') === ADMIN_SECRET;
 
@@ -416,28 +408,14 @@
             el.classList.toggle('expanded');
         };
 
-        // RSVP
+        // RSVP (sin bloqueo por localStorage)
         let qty = 1;
         const modal = document.getElementById('rsvpModal');
         const floatingBtn = document.getElementById('floatingBtn');
-        const CONFIRMED_KEY = 'xv-maria-fernanda-confirmed';
 
-        function checkConfirmedStatus() {
-            if (localStorage.getItem(CONFIRMED_KEY) === 'true') {
-                floatingBtn.classList.add('confirmed');
-                floatingBtn.textContent = 'Asistencia confirmada';
-                document.getElementById('openModalBtn').textContent = '✓ Ya confirmaste';
-                document.getElementById('openModalBtn').style.pointerEvents = 'none';
-                document.getElementById('openModalBtn').style.opacity = '0.7';
-            }
-        }
-        checkConfirmedStatus();
-
+        // El botón flotante y el botón de la tarjeta SIEMPRE abren el modal
         document.getElementById('openModalBtn').addEventListener('click',()=>modal.classList.add('active'));
-        floatingBtn.addEventListener('click',()=>{
-            if (localStorage.getItem(CONFIRMED_KEY) === 'true') return;
-            modal.classList.add('active');
-        });
+        floatingBtn.addEventListener('click',()=> modal.classList.add('active'));
         document.getElementById('closeModal').addEventListener('click',()=>modal.classList.remove('active'));
         document.getElementById('minusBtn').addEventListener('click',()=>{ if(qty>1) qty--; document.getElementById('guestQty').textContent=qty; });
         document.getElementById('plusBtn').addEventListener('click',()=>{ if(qty<5) qty++; document.getElementById('guestQty').textContent=qty; });
@@ -446,29 +424,26 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmYWJ4eG9tZW1ldGFmeW5haWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5Mzc1MDAsImV4cCI6MjA5ODUxMzUwMH0.7Utm_EwgkjgZgXq-TWeqisbVEkXP035EBnWLARi6yV8';
         const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
 
-        async function fetchCount() {
-            let res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?select=personas`,{headers});
-            let rows = await res.json();
-            return rows.reduce((s,r)=>s+r.personas,0);
+        async function submitConfirmation(name, qty) {
+            let label = qty > 1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
+            await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`,{
+                method:'POST',
+                headers:{...headers,'Prefer':'return=minimal'},
+                body:JSON.stringify({nombre:label,personas:qty})
+            });
         }
-        async function updateCounter() {
-            let count = await fetchCount();
-            document.getElementById('rsvpCount').textContent = count;
-        }
-        updateCounter();
 
         document.getElementById('submitRsvp').addEventListener('click', async ()=>{
             let name = document.getElementById('guestName').value.trim() || 'Invitado';
-            let label = qty>1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
-            await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`,{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({nombre:label,personas:qty})});
-            updateCounter();
-            let count = await fetchCount();
-
-            localStorage.setItem(CONFIRMED_KEY, 'true');
-            checkConfirmedStatus();
-
-            window.open(`https://wa.me/526951093237?text=${encodeURIComponent('Confirmo asistencia a XV de Maria Fernanda: '+label+'. Total confirmados: '+count)}`,'_blank');
+            await submitConfirmation(name, qty);
+            // Opcional: cerrar modal y limpiar campos
             modal.classList.remove('active');
+            document.getElementById('guestName').value = '';
+            document.getElementById('guestQty').textContent = '1';
+            qty = 1;
+            // Enviar WhatsApp
+            let label = qty > 1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
+            window.open(`https://wa.me/526951093237?text=${encodeURIComponent('Confirmo asistencia a XV de Maria Fernanda: '+label)}`,'_blank');
         });
 
         // ================= FUNCIONES DEL PANEL DE ADMINISTRACIÓN =================
@@ -536,7 +511,6 @@
                     });
                 } catch (err) { /* ignore */ }
 
-                localStorage.removeItem('xv-maria-fernanda-confirmed');
                 render();
             }
 
