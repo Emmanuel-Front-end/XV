@@ -177,6 +177,8 @@
             padding:8px 18px; border-radius:50px; cursor:pointer; transition:0.3s;
         }
         .lux-btn:hover { background:var(--gold); color:#fff; }
+        button:disabled { opacity: 0.4; cursor: not-allowed !important; }
+        button:disabled:hover { background: transparent !important; color: var(--gold-deep) !important; }
 
         /* RSVP */
         .rsvp-section { background: #fdfaf7; }
@@ -375,7 +377,7 @@
             <span id="guestQty" style="font-size:24px;font-family:'Playfair Display';">1</span>
             <button id="plusBtn" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--gold);background:#fff;font-size:18px;">+</button>
         </div>
-        <button id="submitRsvp" style="width:100%;padding:14px;background:linear-gradient(135deg,#c97a8e,#8c4357);color:#fff;border:none;border-radius:30px;font-family:'Montserrat',sans-serif;letter-spacing:1px;margin-top:15px;">Enviar por WhatsApp</button>
+        <button id="submitRsvp" disabled style="width:100%;padding:14px;background:linear-gradient(135deg,#c97a8e,#8c4357);color:#fff;border:none;border-radius:30px;font-family:'Montserrat',sans-serif;letter-spacing:1px;margin-top:15px;">Enviar por WhatsApp</button>
         <p id="modalError" style="color:#b3435a;font-size:12px;min-height:18px;"></p>
     </div>
 </div>
@@ -449,9 +451,22 @@
         const floatingBtn = document.getElementById('floatingBtn');
 
         // El botón flotante y el botón de la tarjeta SIEMPRE abren el modal
-        document.getElementById('openModalBtn').addEventListener('click',()=>modal.classList.add('active'));
-        floatingBtn.addEventListener('click',()=> modal.classList.add('active'));
+        document.getElementById('openModalBtn').addEventListener('click',()=>{
+            document.getElementById('modalError').textContent = '';
+            document.getElementById('submitRsvp').disabled = !document.getElementById('guestName').value.trim();
+            modal.classList.add('active');
+        });
+        floatingBtn.addEventListener('click',()=> {
+            document.getElementById('modalError').textContent = '';
+            document.getElementById('submitRsvp').disabled = !document.getElementById('guestName').value.trim();
+            modal.classList.add('active');
+        });
         document.getElementById('closeModal').addEventListener('click',()=>modal.classList.remove('active'));
+        document.getElementById('guestName').addEventListener('input', (e) => {
+            document.getElementById('modalError').textContent = '';
+            document.getElementById('submitRsvp').disabled = !e.target.value.trim();
+        });
+
         document.getElementById('minusBtn').addEventListener('click',()=>{ if(qty>1) qty--; document.getElementById('guestQty').textContent=qty; });
         document.getElementById('plusBtn').addEventListener('click',()=>{ if(qty<5) qty++; document.getElementById('guestQty').textContent=qty; });
 
@@ -471,7 +486,16 @@
         }
 
         document.getElementById('submitRsvp').addEventListener('click', async ()=>{
-            let name = document.getElementById('guestName').value.trim() || 'Invitado';
+            const modalError = document.getElementById('modalError');
+            modalError.textContent = '';
+
+            let name = document.getElementById('guestName').value.trim();
+            if (!name) {
+                modalError.textContent = 'Por favor escribe el apellido de tu familia';
+                document.getElementById('guestName').focus();
+                return;
+            }
+
             const idCreado = await submitConfirmation(name, qty);
 
             if (idCreado) {
@@ -486,6 +510,7 @@
 
             modal.classList.remove('active');
             document.getElementById('guestName').value = '';
+            document.getElementById('submitRsvp').disabled = true;
             document.getElementById('guestQty').textContent = '1';
             qty = 1;
 
@@ -573,10 +598,46 @@
             }
         });
 
-        // Si ya había confirmado antes (visita anterior), muestra el estado directo
-        if (localStorage.getItem('xv_conf_id')) {
-            mostrarEstadoConfirmado();
+        // Si ya había confirmado antes (visita anterior), verifica que su
+        // confirmación siga existiendo (por si el admin la borró por accidente)
+        async function verificarConfirmacionExistente() {
+            const idGuardado = localStorage.getItem('xv_conf_id');
+            if (!idGuardado) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${idGuardado}&select=id,personas`, { headers });
+                const rows = await res.json();
+
+                if (rows.length === 0) {
+                    // Ya no existe (se borró) — se libera para poder confirmar de nuevo
+                    localStorage.removeItem('xv_conf_id');
+                    localStorage.removeItem('xv_conf_qty');
+                    localStorage.removeItem('xv_conf_name');
+                    restablecerFormularioConfirmacion();
+                    return;
+                }
+
+                // Sigue existiendo: sincroniza por si el admin cambió la cantidad
+                localStorage.setItem('xv_conf_qty', rows[0].personas);
+                mostrarEstadoConfirmado();
+            } catch (err) {
+                // Si falla la verificación por red, muestra con lo que ya había localmente
+                mostrarEstadoConfirmado();
+            }
         }
+
+        function restablecerFormularioConfirmacion() {
+            openModalBtn.style.display = 'inline-flex';
+            floatingBtn.style.display = 'flex';
+            rsvpConfirmedMsg.classList.remove('show');
+            addGuestsBox.classList.remove('show');
+        }
+
+        verificarConfirmacionExistente();
+
+        // Revisa cada 5 segundos por si el admin borra o cambia algo mientras
+        // el invitado sigue viendo la página
+        setInterval(verificarConfirmacionExistente, 5000);
 
         // ================= FUNCIONES DEL PANEL DE ADMINISTRACIÓN =================
         async function getAdminData() {
