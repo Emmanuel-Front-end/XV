@@ -340,6 +340,7 @@
 
         <div class="rsvp-confirmed-msg" id="rsvpConfirmedMsg">
             <p>✓ ¡Gracias por confirmar tu asistencia!</p>
+            <p id="confirmedCountText" style="font-family:'Playfair Display',serif;font-weight:600;color:var(--pink-dark);font-size:18px;"></p>
             <button class="add-guests-btn" id="showAddGuestsBtn">➕ ¿Falta alguien de tu familia?</button>
 
             <div class="add-guests-box" id="addGuestsBox">
@@ -510,12 +511,20 @@
             rsvpConfirmedMsg.classList.add('show');
 
             qtyActualConfirmada = parseInt(localStorage.getItem('xv_conf_qty') || '0', 10);
+            actualizarTextoConfirmado();
 
             if (qtyActualConfirmada >= LIMITE_INVITADOS) {
                 showAddGuestsBtn.style.display = 'none';
             } else {
                 showAddGuestsBtn.style.display = 'inline-flex';
             }
+        }
+
+        function actualizarTextoConfirmado() {
+            const texto = qtyActualConfirmada === 1
+                ? 'Confirmaste 1 persona'
+                : `Confirmaste ${qtyActualConfirmada} personas`;
+            document.getElementById('confirmedCountText').textContent = texto;
         }
 
         showAddGuestsBtn.addEventListener('click', () => {
@@ -556,6 +565,7 @@
 
             localStorage.setItem('xv_conf_qty', nuevaCantidad);
             qtyActualConfirmada = nuevaCantidad;
+            actualizarTextoConfirmado();
             addGuestsBox.classList.remove('show');
 
             if (qtyActualConfirmada >= LIMITE_INVITADOS) {
