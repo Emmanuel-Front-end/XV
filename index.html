@@ -187,6 +187,18 @@
             color: var(--pink-dark); opacity: 0.8; margin: 16px 0 0;
             background: rgba(207, 163, 93, 0.1); padding: 8px 18px; border-radius: 50px; display: inline-block;
         }
+        .rsvp-confirmed-msg { display:none; }
+        .rsvp-confirmed-msg.show { display:block; }
+        .rsvp-confirmed-msg p { font-style: italic; color: var(--pink-dark); margin: 14px 0; }
+        .add-guests-btn {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+            background: transparent; border: 1.5px solid var(--pink); color: var(--pink-dark);
+            font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+            padding: 10px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+        }
+        .add-guests-btn:hover { background: var(--pink); color: #fff; }
+        .add-guests-box { display: none; margin-top: 16px; }
+        .add-guests-box.show { display: block; }
         .modal-overlay { position:fixed; inset:0; background:rgba(40,15,20,0.6); backdrop-filter:blur(8px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:0.4s; }
         .modal-overlay.active { opacity:1; visibility:visible; }
         .modal-dialog { background:#fff; border-radius:28px; padding:35px 25px; max-width:400px; width:90%; box-shadow:0 40px 60px rgba(0,0,0,0.25); text-align:center; transform:translateY(30px); transition:0.4s cubic-bezier(0.22,0.9,0.3,1.1); }
@@ -223,12 +235,18 @@
         .admin-total-number { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 42px; color: var(--pink-dark); }
         .admin-total-label { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--pink-dark); opacity: 0.6; margin-top: 5px; }
         .admin-list { max-width: 400px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 8px 0; box-shadow: 0 8px 24px rgba(90, 40, 50, 0.06); }
-        .admin-list-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #f5e8ec; font-size: 16px; color: var(--ink); }
+        .admin-list-item { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #f5e8ec; font-size: 16px; color: var(--ink); }
         .admin-list-item:last-child { border-bottom: none; }
         .admin-list-index { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--pink-dark); opacity: 0.5; min-width: 20px; }
         .admin-list-name { flex: 1; }
         .admin-list-delete { background: none; border: 1px solid #e8b8c2; color: #b3435a; width: 28px; height: 28px; border-radius: 50%; font-size: 12px; line-height: 1; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
         .admin-list-delete:hover { background: #b3435a; color: #fff; }
+        .admin-list-fill {
+            font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase;
+            color: var(--gold-deep); background: var(--champagne); border: 1px solid var(--gold);
+            padding: 5px 10px; border-radius: 50px; cursor: pointer; flex-shrink: 0; white-space: nowrap;
+        }
+        .admin-list-fill:hover { background: var(--gold); color: #fff; }
         .admin-empty { text-align: center; font-style: italic; color: var(--ink); opacity: 0.5; padding: 20px; }
         .admin-refresh, .admin-reset {
             display: block; margin: 18px auto 0;
@@ -319,6 +337,22 @@
         <p style="font-style:italic;opacity:0.7;margin:12px 0;">Tu presencia hará este día inolvidable</p>
         <p class="rsvp-deadline">🗓 Confirma antes del 10 de julio de 2026</p>
         <button class="lux-btn" id="openModalBtn" style="padding:12px 28px;">💬 Confirmar</button>
+
+        <div class="rsvp-confirmed-msg" id="rsvpConfirmedMsg">
+            <p>✓ ¡Gracias por confirmar tu asistencia!</p>
+            <button class="add-guests-btn" id="showAddGuestsBtn">➕ ¿Falta alguien de tu familia?</button>
+
+            <div class="add-guests-box" id="addGuestsBox">
+                <p style="font-size:13px;opacity:0.7;">¿Cuántos más quieres agregar?</p>
+                <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:12px 0;">
+                    <button id="addMinusBtn" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);background:#fff;font-size:16px;">−</button>
+                    <span id="addQty" style="font-size:20px;font-family:'Playfair Display';">1</span>
+                    <button id="addPlusBtn" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);background:#fff;font-size:16px;">+</button>
+                </div>
+                <button class="add-guests-btn" id="confirmAddBtn" style="background:var(--pink);color:#fff;">Agregar</button>
+                <p id="addError" style="color:#b3435a;font-size:11px;min-height:16px;"></p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -426,25 +460,113 @@
 
         async function submitConfirmation(name, qty) {
             let label = qty > 1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
-            await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`,{
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones`,{
                 method:'POST',
-                headers:{...headers,'Prefer':'return=minimal'},
+                headers:{...headers,'Prefer':'return=representation'},
                 body:JSON.stringify({nombre:label,personas:qty})
             });
+            const rows = await res.json();
+            return rows && rows[0] ? rows[0].id : null;
         }
 
         document.getElementById('submitRsvp').addEventListener('click', async ()=>{
             let name = document.getElementById('guestName').value.trim() || 'Invitado';
-            await submitConfirmation(name, qty);
-            // Opcional: cerrar modal y limpiar campos
+            const idCreado = await submitConfirmation(name, qty);
+
+            if (idCreado) {
+                localStorage.setItem('xv_conf_id', idCreado);
+                localStorage.setItem('xv_conf_qty', qty);
+                localStorage.setItem('xv_conf_name', name);
+            }
+
+            // Enviar WhatsApp
+            let label = qty > 1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
+            window.open(`https://wa.me/526951093237?text=${encodeURIComponent('Confirmo asistencia a XV de Maria Fernanda: '+label)}`,'_blank');
+
             modal.classList.remove('active');
             document.getElementById('guestName').value = '';
             document.getElementById('guestQty').textContent = '1';
             qty = 1;
-            // Enviar WhatsApp
-            let label = qty > 1 ? `Fam. ${name} (${qty})` : `Fam. ${name}`;
-            window.open(`https://wa.me/526951093237?text=${encodeURIComponent('Confirmo asistencia a XV de Maria Fernanda: '+label)}`,'_blank');
+
+            mostrarEstadoConfirmado();
         });
+
+        // ================= ESTADO CONFIRMADO / AGREGAR FALTANTES =================
+        const LIMITE_INVITADOS = 5;
+        const openModalBtn = document.getElementById('openModalBtn');
+        const rsvpConfirmedMsg = document.getElementById('rsvpConfirmedMsg');
+        const showAddGuestsBtn = document.getElementById('showAddGuestsBtn');
+        const addGuestsBox = document.getElementById('addGuestsBox');
+        const addError = document.getElementById('addError');
+        let addQty = 1;
+        let qtyActualConfirmada = 0;
+
+        function mostrarEstadoConfirmado() {
+            const idGuardado = localStorage.getItem('xv_conf_id');
+            if (!idGuardado) return;
+
+            openModalBtn.style.display = 'none';
+            floatingBtn.style.display = 'none';
+            rsvpConfirmedMsg.classList.add('show');
+
+            qtyActualConfirmada = parseInt(localStorage.getItem('xv_conf_qty') || '0', 10);
+
+            if (qtyActualConfirmada >= LIMITE_INVITADOS) {
+                showAddGuestsBtn.style.display = 'none';
+            } else {
+                showAddGuestsBtn.style.display = 'inline-flex';
+            }
+        }
+
+        showAddGuestsBtn.addEventListener('click', () => {
+            addQty = 1;
+            document.getElementById('addQty').textContent = addQty;
+            addGuestsBox.classList.toggle('show');
+        });
+
+        document.getElementById('addMinusBtn').addEventListener('click', () => {
+            if (addQty > 1) addQty--;
+            document.getElementById('addQty').textContent = addQty;
+        });
+
+        document.getElementById('addPlusBtn').addEventListener('click', () => {
+            const maximoPermitido = LIMITE_INVITADOS - qtyActualConfirmada;
+            if (addQty < maximoPermitido) addQty++;
+            document.getElementById('addQty').textContent = addQty;
+        });
+
+        document.getElementById('confirmAddBtn').addEventListener('click', async () => {
+            addError.textContent = '';
+            const idGuardado = localStorage.getItem('xv_conf_id');
+            if (!idGuardado) return;
+
+            const nuevaCantidad = qtyActualConfirmada + addQty;
+            if (nuevaCantidad > LIMITE_INVITADOS) {
+                addError.textContent = `Máximo ${LIMITE_INVITADOS} personas por invitación`;
+                return;
+            }
+
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${idGuardado}`, {
+                    method: 'PATCH',
+                    headers: { ...headers, 'Prefer': 'return=minimal' },
+                    body: JSON.stringify({ personas: nuevaCantidad })
+                });
+            } catch (err) { /* ignore */ }
+
+            localStorage.setItem('xv_conf_qty', nuevaCantidad);
+            qtyActualConfirmada = nuevaCantidad;
+            addGuestsBox.classList.remove('show');
+
+            if (qtyActualConfirmada >= LIMITE_INVITADOS) {
+                showAddGuestsBtn.style.display = 'none';
+            }
+        });
+
+        // Si ya había confirmado antes (visita anterior), muestra el estado directo
+        if (localStorage.getItem('xv_conf_id')) {
+            mostrarEstadoConfirmado();
+        }
 
         // ================= FUNCIONES DEL PANEL DE ADMINISTRACIÓN =================
         async function getAdminData() {
@@ -473,17 +595,38 @@
                     return;
                 }
 
-                adminList.innerHTML = data.rows.map((row, i) =>
-                    `<div class="admin-list-item">
+                adminList.innerHTML = data.rows.map((row, i) => {
+                    const faltan = 5 - row.personas;
+                    const botonCompletar = faltan > 0
+                        ? `<button class="admin-list-fill" data-id="${row.id}" data-actual="${row.personas}">+${faltan} hasta 5</button>`
+                        : '';
+                    return `<div class="admin-list-item">
                         <span class="admin-list-index">${i+1}</span>
                         <span class="admin-list-name">${row.nombre}</span>
+                        ${botonCompletar}
                         <button class="admin-list-delete" data-id="${row.id}" title="Borrar esta confirmación">✕</button>
-                    </div>`
-                ).join('');
+                    </div>`;
+                }).join('');
 
                 adminList.querySelectorAll('.admin-list-delete').forEach(btn => {
                     btn.addEventListener('click', () => deleteEntry(btn.dataset.id));
                 });
+
+                adminList.querySelectorAll('.admin-list-fill').forEach(btn => {
+                    btn.addEventListener('click', () => completarACinco(btn.dataset.id, parseInt(btn.dataset.actual, 10)));
+                });
+            }
+
+            async function completarACinco(id, actual) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/confirmaciones?id=eq.${id}`, {
+                        method: 'PATCH',
+                        headers: { ...headers, 'Prefer': 'return=minimal' },
+                        body: JSON.stringify({ personas: 5 })
+                    });
+                } catch (err) { /* ignore */ }
+
+                render();
             }
 
             async function deleteEntry(id) {
@@ -517,6 +660,9 @@
             adminRefresh.addEventListener('click', render);
             adminReset.addEventListener('click', resetCounter);
             render();
+
+            // Se actualiza solo cada 5 segundos, sin necesidad de tocar nada
+            setInterval(render, 5000);
         }
     })();
 </script>
